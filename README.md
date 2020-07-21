@@ -1,7 +1,7 @@
 
 <p align="center"> 
- <a href="https://tal-tech.github.io/fend" target="_blank">
-    <img src="./www/img/fend.png"  alt="Fend Logo" align=center />
+ <a href="https://tal-tech.github.io/fend-doc/" target="_blank">
+    <img src="./fend.png"  alt="Fend Logo" align=center />
  </a> 
 </p>
 
@@ -11,7 +11,7 @@
  * Good ELK Trace Log standard within
 
 ### Document    
-[Document](https://tal-tech.github.io/fend)
+[Document](https://tal-tech.github.io/fend-doc/)
 
 ### Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
@@ -23,8 +23,7 @@
 master is 1.2.x version 
 
 ```bash
-git clone https://github.com/tal-tech/fend.git
-composer install --no-dev
+composer create-project https://github.com/tal-tech/fend-skeleton.git
 ```
 
 Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser 
