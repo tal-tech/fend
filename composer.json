@@ -1,0 +1,59 @@
+{
+  "name": "fend/fend",
+  "description": "Fend PHP framework",
+  "license": "Apache-2.0",
+  "keywords": [
+    "php",
+    "swoole",
+    "fend",
+    "php-fpm"
+  ],
+  "authors": [
+    {
+      "name": "ChangLong.Xu",
+      "email": "xcl_rockman@qq.com",
+      "homepage": "http://www.fireidea.com",
+      "role": "Developer"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Fend\\": "./src",
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Fend\\": "./src",
+      "Test\\App\\": "./tests/app"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "ext-json": "*",
+    "ext-openssl": "*",
+    "ext-curl": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.5.14",
+    "swoole/ide-helper": "~4.4.0"
+  },
+  "suggest": {
+    "ext-swoole": "Swoole Server is Fasted plugin",
+    "ext-pdo": "Required to use MySQL Client.",
+    "ext-pdo_mysql": "Required to use MySQL Client.",
+    "ext-redis": "Required to use Redis Client.",
+    "ext-rdkafka": "for kafka communicate",
+    "smarty/smarty": "smarty template",
+    "symfony/console": "Symfony Console",
+    "nikic/fast-route": "fastRouter for Router"
+  },
+  "scripts": {
+    "pre-install-cmd": "Installer\\Install::install",
+    "pre-update-cmd": "Installer\\Install::install",
+    "fix": "php-cs-fixer fix $1",
+    "analyse": "phpstan analyse --autoload-file=./vendor/autoload.php --memory-limit 1000M -l 0  $1 ",
+    "optimize": "composer dump-autoload -o -a --no-dev"
+  }
+}

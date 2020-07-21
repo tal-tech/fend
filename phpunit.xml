@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         bootstrap="tests/init.php">
+    <testsuites>
+        <testsuite name="all">
+            <directory suffix="Test.php">./tests</directory>
+            <exclude>app/Exec</exclude>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">fend</directory>
+            <directory suffix=".php">tests</directory>
+            <exclude>
+                <directory suffix=".php">app/Exec</directory>
+                <directory suffix=".php">bin</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="coverage/report" lowUpperBound="35" highLowerBound="70"/>
+        <log type="coverage-clover" target="coverage/coverage.xml"/>
+        <log type="coverage-php" target="coverage/coverage.serialized"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
+        <log type="testdox-html" target="coverage/testdox.html"/>
+        <log type="testdox-text" target="coverage/testdox.txt"/>
+    </logging>
+</phpunit>
