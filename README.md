@@ -23,7 +23,7 @@
 master is 1.2.x version 
 
 ```bash
-composer create-project https://github.com/tal-tech/fend-skeleton.git
+composer create-project fend/fend-skeleton project_name
 ```
 
 Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser 
