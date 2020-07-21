@@ -48,12 +48,5 @@
     "smarty/smarty": "smarty template",
     "symfony/console": "Symfony Console",
     "nikic/fast-route": "fastRouter for Router"
-  },
-  "scripts": {
-    "pre-install-cmd": "Installer\\Install::install",
-    "pre-update-cmd": "Installer\\Install::install",
-    "fix": "php-cs-fixer fix $1",
-    "analyse": "phpstan analyse --autoload-file=./vendor/autoload.php --memory-limit 1000M -l 0  $1 ",
-    "optimize": "composer dump-autoload -o -a --no-dev"
   }
 }
