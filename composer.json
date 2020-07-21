@@ -20,7 +20,7 @@
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
-      "Fend\\": "./src",
+      "Fend\\": "./src"
     }
   },
   "autoload-dev": {
