@@ -40,3 +40,10 @@ php /bin/start.php -c app/Config/Swoole.php start
 ```
 
 browser http://127.0.0.1:9572/ 
+
+## Contact us
+issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
+
+加群请加微信： 
+
+![](./contactus.png) 
