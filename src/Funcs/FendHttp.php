@@ -10,9 +10,140 @@ use Fend\Log\EagleEye;
  * 网络相关
  *
  **/
-class Http
+class FendHttp
 {
 
+    /**
+     * get 通用处理方法
+     * @param $name
+     *
+     * @return null|string
+     */
+    public static function doGet($name)
+    {
+        $request = \Fend\Di::factory()->getRequest();
+        $param = $request->get($name);
+        if (!is_null($param)) {
+            return is_array($param) ? $param : trim($param);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Post 通用处理方法
+     * @param $name
+     *
+     * @return null|string
+     */
+    public static function doPost($name)
+    {
+        $request = \Fend\Di::factory()->getRequest();
+        $param = $request->post($name);
+        if (!is_null($param)) {
+            return is_array($param) ? $param : trim($param);
+        } else {
+            return null;
+        }
+
+    }
+
+    /**
+     * quest 通用处理方法
+     * @param $name
+     *
+     * @return null|string
+     */
+    public static function doRequest($name)
+    {
+        $request = \Fend\Di::factory()->getRequest();
+        $param = $request->post($name);
+        if ($param === '') {
+            $param = $request->get($name);
+        }
+
+        if (!is_array($param)) {
+            $param = trim($param);
+        }
+
+        return $param;
+
+    }
+
+    //写cookie信息
+    public static function setRawCookie($name, $value, $life, $path = '/', $domain = '')
+    {
+        $response = \Fend\Di::factory()->getResponse();
+
+        if (!empty($domain)) {
+            $domain = '.' . $domain;
+        }
+
+        switch ($life) {
+            case 0:
+            case '':
+            {
+                $expire = time();
+                break;
+            }
+            case -1:
+            {
+                $expire = 0;
+                break;
+            }
+            default:
+            {
+                $expire = time() + $life;
+                break;
+            }
+        }
+        return $response->cookie($name, $value, $expire, $path, $domain);
+    }
+
+    /**
+     * 获取内容的href标签
+     *
+     * @param string $content
+     * @return array
+     */
+    public static function getHref($content)
+    {
+        $pat = '/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/i';
+        preg_match_all($pat, $content, $hrefAry);
+        return $hrefAry;
+    }
+
+    /**
+     * 获取url含rar内容的href标签
+     *
+     * @param string $content
+     * @return array
+     */
+    public static function getHrefRar($content)
+    {
+        $pat = '/<a(.*?)href="(.*?).rar"(.*?)>(.*?)<\/a>/i';
+        preg_match_all($pat, $content, $hrefAry);
+        return $hrefAry;
+    }
+
+    /**
+     * 获取url含src内容的href标签
+     *
+     * @param string $content
+     * @return array
+     */
+    public static function getHrefImg($content)
+    {
+        $pat = "/<img(.+?)src='(.+?)'/i";
+        preg_match_all($pat, $content, $hrefAry);
+        if (empty($hrefAry[0])) {
+            $pat = "/<img(.+?)src=\"(.+?)\"/i";
+            preg_match_all($pat, $content, $hrefAry);
+        }
+        return $hrefAry;
+    }
+
+    //获取客户端IP
 
     /**
      * 获取请求客户端IP
@@ -239,7 +370,7 @@ class Http
             $responseHeaders = [];
             foreach ($serverHeader as $item) {
                 $item = explode(": ", $item);
-                if (count($item) == 2) {
+                if (count($item) === 2) {
                     $responseHeaders[$item[0]] = $item[1];
                 }
             }
@@ -324,20 +455,20 @@ class Http
           curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
           curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
          */
-        if ($method == 'post') {
+        if ($method === 'post') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-        } elseif ($method == 'get') {
+        } elseif ($method === 'get') {
             curl_setopt($ch, CURLOPT_POST, false);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-        } elseif ($method == 'put') {
+        } elseif ($method === 'put') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        } elseif ($method == 'patch') {
+        } elseif ($method === 'patch') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        } elseif ($method == 'delete') {
+        } elseif ($method === 'delete') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
@@ -402,7 +533,7 @@ class Http
             $eagleeye_param["x_response"] = $response;
 
             json_decode($response);
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $return = json_decode($response, true);
             } else {
                 $return = $response;
@@ -500,20 +631,20 @@ class Http
                 curl_setopt($ch, CURLOPT_SSLKEY, $cert['key']);
             }
 
-            if ($method == 'post') {
+            if ($method === 'post') {
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-            } elseif ($method == 'get') {
+            } elseif ($method === 'get') {
                 curl_setopt($ch, CURLOPT_POST, false);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-            } elseif ($method == 'put') {
+            } elseif ($method === 'put') {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            } elseif ($method == 'patch') {
+            } elseif ($method === 'patch') {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            } elseif ($method == 'delete') {
+            } elseif ($method === 'delete') {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             }
@@ -531,7 +662,7 @@ class Http
             if ($active) {
                 curl_multi_select($mh);
             }
-        } while ($active && $status == CURLM_OK);
+        } while ($active && $status === CURLM_OK);
 
         //get result
         foreach ($handleList as $index => $handle) {
@@ -652,20 +783,20 @@ class Http
             //私钥地址
             curl_setopt($ch, CURLOPT_SSLKEY, $cert['key']);
         }
-        if ($method == 'post') {
+        if ($method === 'post') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-        } elseif ($method == 'get') {
+        } elseif ($method === 'get') {
             curl_setopt($ch, CURLOPT_POST, false);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
-        } elseif ($method == 'put') {
+        } elseif ($method === 'put') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        } elseif ($method == 'patch') {
+        } elseif ($method === 'patch') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        } elseif ($method == 'delete') {
+        } elseif ($method === 'delete') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
@@ -715,7 +846,7 @@ class Http
             EagleEye::baseLog($eagleeye_param, $rpc_id);
 
             json_decode($response);
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $return = json_decode($response, true);
             } else {
                 $return = $response;
@@ -736,4 +867,49 @@ class Http
         }
     }
 
+    /**
+     * 获取本次调用堆栈层级文字描述
+     * @return string
+     */
+    public static function getTraceString()
+    {
+        $result = "";
+        $line = 0;
+        $backtrace = debug_backtrace();
+        foreach ($backtrace as $btrace) {
+            if (!empty($btrace["file"]) && !empty($btrace["line"])) {
+                $result .= sprintf("#%s %s(%s) %s%s%s(%s)\n", $line, $btrace["file"], $btrace["line"], $btrace["class"] ?? '', $btrace["type"] ?? '', $btrace["function"] ?? '', http_build_query($btrace));
+                $line++;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 跳转-2:关闭当前窗口
+     * @param $str
+     */
+    public static function getClose($str)
+    {
+        echo "<SCRIPT LANGUAGE='JavaScript'>alert('" . $str . "');window.close();</SCRIPT>";
+        return;
+    }
+
+    /**
+     * @param null $url
+     *  302重定向 默认定向到来访页面
+     */
+    public static function doBreak($url = null)
+    {
+        $response = \Fend\Di::factory()->get('http_response');
+        !$url && $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/';
+        if (!empty($response)) {
+            $response->header("location", $url);
+            $response->status('302');
+        } else {
+            header("location:{$url}");
+        }
+        //中断后续代码执行
+        throw new \Fend\Exception\ExitException("");
+    }
 }

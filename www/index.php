@@ -5,7 +5,7 @@ use Fend\Config;
 use Fend\Debug;
 use Fend\Di;
 use Fend\ExceptionHandle\FendExceptionHandle;
-use Fend\Funcs\Http;
+use Fend\Funcs\FendHttp;
 use Fend\Log\EagleEye;
 use Fend\Log\LogAgent;
 use Fend\Logger;
@@ -59,7 +59,7 @@ if(EagleEye::isEnable()){
     }
     EagleEye::requestStart($traceId, $rpcId);
 
-    EagleEye::setRequestLogInfo("client_ip", Http::getIp());
+    EagleEye::setRequestLogInfo("client_ip", FendHttp::getIp());
     EagleEye::setRequestLogInfo("action", $domain . $uri);
     EagleEye::setRequestLogInfo("param", json_encode([
         "post" => $request->post(),

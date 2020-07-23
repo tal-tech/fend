@@ -98,7 +98,7 @@ class Http extends BaseInterface
             $fResponse->header("rpcid", $rpcid);
 
             //record this request
-            EagleEye::setRequestLogInfo("client_ip", \Fend\Funcs\Http::getIp());
+            EagleEye::setRequestLogInfo("client_ip", \Fend\Funcs\FendHttp::getIp());
             EagleEye::setRequestLogInfo("action", $domain . $uri);
             EagleEye::setRequestLogInfo("param", json_encode(array(
                 "post" => $fRequest->post(),
