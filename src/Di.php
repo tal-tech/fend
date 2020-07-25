@@ -153,7 +153,7 @@ class Di implements ContainerInterface
      */
     public function setResponse(\Fend\Response $response)
     {
-        $this->container["response"] = $response;
+        RequestContext::set("__response", $response);
     }
 
     /**
