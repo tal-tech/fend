@@ -594,13 +594,13 @@ class Write extends \Fend\Db\SQLBuilder
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @param bool $prepare 是否使用prepare预处理，默认关闭
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '', $prepare = false)
+    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '', $prepare = false)
     {
         $bindParam = [];
 
@@ -631,13 +631,13 @@ class Write extends \Fend\Db\SQLBuilder
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @param bool $prepare 是否使用prepare预处理，默认关闭
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '', $prepare = false)
+    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '', $prepare = false)
     {
         $bindParam = [];
 

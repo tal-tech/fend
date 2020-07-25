@@ -13,7 +13,6 @@ use Fend\Write;
  * 注意：如果使用非本model内函数操作数据会导致Cache自动更新失效
  * 注意：非本Model内函数操作，更新数据后，Cache会在指定时间内失效后更新
  * 注意：本cache适合写少读多场景，条件查询cache命中率较低，但可以缓解很多请求
- * 注意：如果不计划使用Cache功能，建议继承DBNCModel更高效
  *
  * Class DBModel
  * @package Fend\App
@@ -76,6 +75,7 @@ class DBModel extends \Fend\Fend
      */
     protected $_writeModel = null;
 
+
     /**
      * 单例工厂模式
      * @return static
@@ -97,6 +97,7 @@ class DBModel extends \Fend\Fend
      */
     public function __construct()
     {
+
     }
 
     ////////////
@@ -314,6 +315,15 @@ class DBModel extends \Fend\Fend
         }
     }
 
+    /**
+     * 根据操作类型，获取操作model，如果开启forceWrite那么持续返回写model
+     * @return Read|Write
+     */
+    protected function getWriteModel()
+    {
+        return $this->writeModel;
+    }
+
     ////////////////
     /// ADUQ
     ///////////////
@@ -336,8 +346,7 @@ class DBModel extends \Fend\Fend
 
         if ($ret) {
             $this->_cacheSearchData && $this->incrVersion();
-            $this->_cacheSingleData && $this->setSingleCache("info_" . $ret,
-                $this->getModel(true)->getById($ret, [], $this->_prepare));
+            $this->_cacheSingleData && $this->setSingleCache("info_" . $ret, $this->getWriteModel()->getById($ret, [], $this->_prepare));
         }
         return $ret;
     }
@@ -355,7 +364,7 @@ class DBModel extends \Fend\Fend
             $data[$k] = $this->filterFieldData($item);
         }
 
-        $ret = $this->getModel(true)->addMulti($data, $this->_prepare);
+        $ret = $this->getWriteModel()->addMulti($data, $this->_prepare);
 
         if ($ret) {
             $this->_cacheSearchData && $this->incrVersion();
@@ -384,18 +393,18 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //fetch list of id
-            $idList = $this->getModel(true)->getListByCondition($condition, "id", 0, 0, "", $this->_prepare);
-            $idArr = [];
+            $idList = $this->getWriteModel()->getListByCondition($condition, "id", 0, 0, "", $this->_prepare);
+            $idArr  = [];
             foreach ($idList as $item) {
                 $idArr[] = $item["id"];
             }
 
             //update by condition
-            $ret = $this->getModel(true)->edit($condition, $data, $this->_prepare);
+            $ret = $this->getWriteModel()->edit($condition, $data, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
-                $list = $this->getModel(true)->getListByWhere([["id", "in", $idArr]], "", 0, 0, "", $this->_prepare);
+                $list = $this->getWriteModel()->getListByWhere([["id", "in", $idArr]], "", 0, 0, "", $this->_prepare);
                 foreach ($list as $item) {
                     $this->setSingleCache("info_" . $item["id"], $item);
                 }
@@ -407,7 +416,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->edit($condition, $data, $this->_prepare);
+            return $this->getWriteModel()->edit($condition, $data, $this->_prepare);
         }
 
     }
@@ -433,18 +442,18 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //fetch list of id
-            $idList = $this->getModel(true)->getListByWhere($where, "id", 0, 0, "", $this->_prepare);
-            $idArr = [];
+            $idList = $this->getWriteModel()->getListByWhere($where, "id", 0, 0, "", $this->_prepare);
+            $idArr  = [];
             foreach ($idList as $item) {
                 $idArr[] = $item["id"];
             }
 
             //update by condition
-            $ret = $this->getModel(true)->editByWhere($where, $data, $this->_prepare);
+            $ret = $this->getWriteModel()->editByWhere($where, $data, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
-                $list = $this->getModel(true)->getListByWhere([["id", "in", $idArr]], "", 0, 0, "", $this->_prepare);
+                $list = $this->getWriteModel()->getListByWhere([["id", "in", $idArr]], "", 0, 0, "", $this->_prepare);
                 foreach ($list as $item) {
                     $this->setSingleCache("info_" . $item["id"], $item);
                 }
@@ -456,7 +465,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->editByWhere($where, $data, $this->_prepare);
+            return $this->getWriteModel()->editByWhere($where, $data, $this->_prepare);
         }
 
     }
@@ -481,11 +490,11 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //update by condition
-            $ret = $this->getModel(true)->editById($id, $data, $this->_prepare);
+            $ret = $this->getWriteModel()->editById($id, $data, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
-                $this->setSingleCache("info_" . $id, $this->getModel(true)->getById($id, [], $this->_prepare));
+                $this->setSingleCache("info_" . $id, $this->getWriteModel()->getById($id, [], $this->_prepare));
                 $this->_cacheSearchData && $this->incrVersion();
             }
 
@@ -493,7 +502,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->editById($id, $data, $this->_prepare);
+            return $this->getWriteModel()->editById($id, $data, $this->_prepare);
         }
     }
 
@@ -513,14 +522,14 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //fetch list of id
-            $idList = $this->getModel(true)->getListByCondition($condition, "id", 0, 0, "", $this->_prepare);
-            $idArr = [];
+            $idList = $this->getWriteModel()->getListByCondition($condition, "id", 0, 0, "", $this->_prepare);
+            $idArr  = [];
             foreach ($idList as $item) {
                 $idArr[] = $item["id"];
             }
 
             //del by condition
-            $ret = $this->getModel(true)->del($condition, $this->_prepare);
+            $ret = $this->getWriteModel()->del($condition, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
@@ -535,7 +544,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->del($condition, $this->_prepare);
+            return $this->getWriteModel()->del($condition, $this->_prepare);
         }
 
     }
@@ -557,14 +566,14 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //fetch list of id
-            $idList = $this->getModel(true)->getListByWhere($where, "id", 0, 0, "", $this->_prepare);
-            $idArr = [];
+            $idList = $this->getWriteModel()->getListByWhere($where, "id", 0, 0, "", $this->_prepare);
+            $idArr  = [];
             foreach ($idList as $item) {
                 $idArr[] = $item["id"];
             }
 
             //del by where
-            $ret = $this->getModel(true)->delByWhere($where, $this->_prepare);
+            $ret = $this->getWriteModel()->delByWhere($where, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
@@ -579,7 +588,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->delByWhere($where, $this->_prepare);
+            return $this->getWriteModel()->delByWhere($where, $this->_prepare);
         }
     }
 
@@ -599,7 +608,7 @@ class DBModel extends \Fend\Fend
         if ($this->_cacheSearchData || $this->_cacheSingleData) {
 
             //update by condition
-            $ret = $this->getModel(true)->delById($id, $this->_prepare);
+            $ret = $this->getWriteModel()->delById($id, $this->_prepare);
 
             if ($ret) {
                 //refresh cache
@@ -611,7 +620,7 @@ class DBModel extends \Fend\Fend
 
         } else {
             //just do it
-            return $this->getModel(true)->delById($id, $this->_prepare);
+            return $this->getWriteModel()->delById($id, $this->_prepare);
         }
     }
 
@@ -913,13 +922,13 @@ class DBModel extends \Fend\Fend
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @param bool $cache 是否开启cache
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '', $cache = true)
+    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '', $cache = true)
     {
         $key = "gcbgl_" . md5(json_encode(array_merge($where, [$group, $offset, $limit, $fields, $order])));
 
@@ -930,8 +939,7 @@ class DBModel extends \Fend\Fend
             }
         }
 
-        $result = $this->getModel()->getSumByGroupList($group, $where, $offset, $limit, $fields, $order,
-            $this->_prepare);
+        $result = $this->getModel()->getSumByGroupList($group, $where, $offset, $limit, $fields, $order, $this->_prepare);
 
         if ($result && $cache && $this->_cacheSearchData) {
             $this->setVersionCache($key, $result);
@@ -946,13 +954,13 @@ class DBModel extends \Fend\Fend
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @param bool $cache 是否开启cache
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '', $cache = true)
+    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '', $cache = true)
     {
         $key = "gcbg_" . md5(json_encode(array_merge($where, [$group, $offset, $limit, $fields, $order])));
 
@@ -1031,9 +1039,9 @@ class DBModel extends \Fend\Fend
     public function getLastSQL($isWrite = false)
     {
         if ($isWrite) {
-            return $this->getModel(true)->getLastSQL();
+            return $this->writeModel === null ? [] : $this->writeModel->getLastSQL();
         } else {
-            return $this->getModel()->getLastSQL();
+            return $this->readModel === null ? [] : $this->readModel->getLastSQL();
         }
     }
 
@@ -1043,7 +1051,7 @@ class DBModel extends \Fend\Fend
      */
     public function getLastInsertId()
     {
-        return $this->getModel(true)->getLastId();
+        return $this->writeModel === null ? 0 : $this->writeModel->getLastId();
     }
 
     /**
@@ -1052,7 +1060,7 @@ class DBModel extends \Fend\Fend
      */
     public function getAffectRow()
     {
-        return $this->getModel(true)->afrows();
+        return $this->writeModel === null ? -1 : $this->writeModel->afrows();
     }
 
     /**
@@ -1061,7 +1069,7 @@ class DBModel extends \Fend\Fend
      */
     public function transaction()
     {
-        return $this->getModel(true)->trans_begin();
+        return $this->getWriteModel()->trans_begin();
     }
 
     /**
@@ -1070,7 +1078,7 @@ class DBModel extends \Fend\Fend
      */
     public function commit()
     {
-        return $this->getModel(true)->trans_commit();
+        return $this->getWriteModel()->trans_commit();
     }
 
     /**
@@ -1079,7 +1087,7 @@ class DBModel extends \Fend\Fend
      */
     public function rollBack()
     {
-        return $this->getModel(true)->trans_rollback();
+        return $this->getWriteModel()->trans_rollback();
     }
 
     /**
@@ -1109,7 +1117,7 @@ class DBModel extends \Fend\Fend
      */
     public function transactionCallback(callable $callable)
     {
-        return $this->getModel(true)->getModule()->transaction($callable);
+        return $this->getWriteModel()->getModule()->transaction($callable);
     }
 
     /**

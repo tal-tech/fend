@@ -255,7 +255,7 @@ class DBNCModelTest extends TestCase
         self::isFalse($ret);
 
         $ret = $model->getAffectRow();
-        self::assertEquals($ret, 0);
+        self::assertEquals($ret, 1);
 
         //transaction by manual
         $ret = $model->transaction();

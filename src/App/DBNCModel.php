@@ -75,7 +75,6 @@ class DBNCModel extends \Fend\Fend
     {
     }
 
-
     /**
      * 设置字段列表
      * 用于过滤update及insert数据
@@ -179,6 +178,15 @@ class DBNCModel extends \Fend\Fend
     }
 
     /**
+     * 根据操作类型，获取操作model，如果开启forceWrite那么持续返回写model
+     * @return Read|Write
+     */
+    protected function getWriteModel()
+    {
+        return $this->writeModel;
+    }
+
+    /**
      * 添加一条数据
      * @param array $data 传入要添加数据的kv
      * @return bool|int
@@ -193,7 +201,7 @@ class DBNCModel extends \Fend\Fend
             return false;
         }
 
-        return $this->getModel(true)->add($data, $this->_prepare);
+        return $this->getWriteModel()->add($data, $this->_prepare);
     }
 
     /**
@@ -209,7 +217,7 @@ class DBNCModel extends \Fend\Fend
             $data[$k] = $this->filterFieldData($item);
         }
 
-        return $this->getModel(true)->addMulti($data, $this->_prepare);
+        return $this->getWriteModel()->addMulti($data, $this->_prepare);
     }
 
     /**
@@ -227,7 +235,7 @@ class DBNCModel extends \Fend\Fend
         if (empty($condition) || empty($data)) {
             return false;
         }
-        return $this->getModel(true)->edit($condition, $data, $this->_prepare);
+        return $this->getWriteModel()->edit($condition, $data, $this->_prepare);
     }
 
     /**
@@ -246,7 +254,7 @@ class DBNCModel extends \Fend\Fend
         if (empty($where) || empty($data)) {
             return false;
         }
-        return $this->getModel(true)->editByWhere($where, $data, $this->_prepare);
+        return $this->getWriteModel()->editByWhere($where, $data, $this->_prepare);
     }
 
     /**
@@ -265,7 +273,7 @@ class DBNCModel extends \Fend\Fend
             return false;
         }
 
-        return $this->getModel(true)->editById($id, $data, $this->_prepare);
+        return $this->getWriteModel()->editById($id, $data, $this->_prepare);
     }
 
     /**
@@ -280,7 +288,7 @@ class DBNCModel extends \Fend\Fend
             return false;
         }
 
-        return $this->getModel(true)->del($condition, $this->_prepare);
+        return $this->getWriteModel()->del($condition, $this->_prepare);
     }
 
     /**
@@ -296,7 +304,7 @@ class DBNCModel extends \Fend\Fend
             return false;
         }
 
-        return $this->getModel(true)->delByWhere($where, $this->_prepare);
+        return $this->getWriteModel()->delByWhere($where, $this->_prepare);
     }
 
     /**
@@ -312,7 +320,7 @@ class DBNCModel extends \Fend\Fend
         }
 
         //just do it
-        return $this->getModel(true)->delById($id, $this->_prepare);
+        return $this->getWriteModel()->delById($id, $this->_prepare);
     }
 
     /**
@@ -462,12 +470,12 @@ class DBNCModel extends \Fend\Fend
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '')
+    public function getSumByGroup($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '')
     {
         return $this->getModel()->getSumByGroup($group, $where, $offset, $limit, $fields, $order, $this->_prepare);
     }
@@ -478,12 +486,12 @@ class DBNCModel extends \Fend\Fend
      * @param array $where where条件
      * @param int $offset 翻页offset
      * @param int $limit 一页数据个数
-     * @param string $fields 统计字段，默认是count(*) as total
+     * @param string $fields 统计字段，默认是count(1) as total
      * @param string $order 排序
      * @return array
      * @throws \Exception
      */
-    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(*) as total", $order = '')
+    public function getSumByGroupList($group = "", $where = array(), $offset = 0, $limit = 20, $fields = "count(1) as total", $order = '')
     {
         return $this->getModel()->getSumByGroupList($group, $where, $offset, $limit, $fields, $order, $this->_prepare);
     }
@@ -577,7 +585,7 @@ class DBNCModel extends \Fend\Fend
      */
     public function transaction()
     {
-        return $this->getModel(true)->trans_begin();
+        return $this->getWriteModel()->trans_begin();
     }
 
     /**
@@ -586,7 +594,7 @@ class DBNCModel extends \Fend\Fend
      */
     public function commit()
     {
-        return $this->getModel(true)->trans_commit();
+        return $this->getWriteModel()->trans_commit();
     }
 
     /**
@@ -595,7 +603,7 @@ class DBNCModel extends \Fend\Fend
      */
     public function rollBack()
     {
-        return $this->getModel(true)->trans_rollback();
+        return $this->getWriteModel()->trans_rollback();
     }
 
     /**
@@ -625,7 +633,7 @@ class DBNCModel extends \Fend\Fend
      */
     public function transactionCallback(callable $callable)
     {
-        return $this->getModel(true)->getModule()->transaction($callable);
+        return $this->getWriteModel()->getModule()->transaction($callable);
     }
 
     /**
