@@ -23,7 +23,7 @@
 master is 1.2.x version 
 
 ```bash
-composer create-project fend/fend-skeleton project_name
+composer create-project fend/fend-skeleton:~1.2.0 project_name
 ```
 
 Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser 
@@ -31,8 +31,7 @@ Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser
 #### Swoole Engine Start
 
 ```bash
-git clone https://github.com/tal-tech/fend.git
-composer install --no-dev
+composer create-project fend/fend-skeleton:~1.2.0 project_name
 
 # swoole start ( /bin/fend depend on composer require symfony/console )
 php /bin/fend Swoole -c app/Config/Swoole.php start
@@ -40,6 +39,11 @@ php /bin/start.php -c app/Config/Swoole.php start
 ```
 
 browser http://127.0.0.1:9572/ 
+
+## 1.3.0 version install
+```bash
+composer create-project fend/fend-skeleton:~1.3.0 project_name
+```
 
 ## Contact us
 issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
