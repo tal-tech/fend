@@ -74,7 +74,7 @@ class RequestContext
 
     /**
      * 获取指定Cid对应的根Root Context
-     * @param int $id 协程id
+     * @param int $cid 协程id
      * @return int
      */
     public static function getRootId(int $cid)
