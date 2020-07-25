@@ -5,10 +5,17 @@
  </a> 
 </p>
 
- * tiny and easy customize
- * FPM/Swoole Smooth switching
- * Debug Mode when request querysting set wxdebug=1|2|3
- * Good ELK Trace Log standard within
+PHP是一款简单方便的语言，而行业开源框架为了`后续灵活` 而变得过于繁重
+
+Fend框架是一款很有历史的框架、初代发布后一直在好未来坊间传播使用、衍生出大量分支版本 
+
+这是一款很有意思的框架、普通的框架内隐藏着大型互联网经验的精华、也同时存在大量历史痕迹
+
+2019年7月 我们对Fend进行整理、封装、推广、目前在好未来内部有大量的用户在使用、维护 
+
+2020年7月 开源、以此共建交流 
+
+我们崇尚 `脚踏实地、仰望星空` 精神 欢迎小伙伴一起参与开源共建
 
 ### Document    
 [Document](https://tal-tech.github.io/fend-doc/)
