@@ -77,14 +77,14 @@ class RequestContext
      * @param int $id 协程id
      * @return int
      */
-    public static function getRootId(int $id)
+    public static function getRootId(int $cid)
     {
-        if (isset(self::$rootId[$id])) {
-            return self::$rootId[$id];
+        if (isset(self::$rootId[$cid])) {
+            return self::$rootId[$cid];
         }
 
-        self::$rootId[$id] = Coroutine::getRootId($id);
-        return self::$rootId[$id];
+        self::$rootId[$cid] = Coroutine::getRootId($cid);
+        return self::$rootId[$cid];
     }
 
     /**
