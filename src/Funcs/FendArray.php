@@ -1,4 +1,5 @@
 <?php
+
 namespace Fend\Funcs;
 
 /**
@@ -17,13 +18,14 @@ class FendArray
         if (empty($array)) {
             return $array;
         }
-        foreach ($array as $key=> &$value) {
+        foreach ($array as $key => &$value) {
             if (empty($value)) {
                 unset($array[$key]);
             }
         }
         return $array;
     }
+
     /**
      * 判断一个值是否在数组中
      * @param $find
@@ -31,7 +33,7 @@ class FendArray
      * @param bool $type 是否区分大小写 1-区分大小写
      * @return bool
      */
-    public static function isInArray($find, $array, $type=true)
+    public static function isInArray($find, $array, $type = true)
     {
         if (empty($array) || empty($find)) {
             return false;
@@ -44,7 +46,7 @@ class FendArray
                     }
                     break;
                 default:
-                    if ($find==$value || strtolower($find) === strtolower($value)) {
+                    if ($find == $value || strtolower($find) === strtolower($value)) {
                         return true;
                     }
                     break;
@@ -52,6 +54,7 @@ class FendArray
         }
         return false;
     }
+
     /**
      * 获取数组某一键值数据
      * @param $array
@@ -72,6 +75,7 @@ class FendArray
         }
         return [];
     }
+
     /**
      * 将对象转换为数组
      *
@@ -106,6 +110,7 @@ class FendArray
         }
         return $dataAry;
     }
+
     //获取数组某一部分字段数据
     public static function getFromOneArrayByKeys($array, $fields)
     {
@@ -172,7 +177,7 @@ class FendArray
                     $countAry[$id] = 1;
                     continue;
                 }
-                $countAry[$id] ++;
+                $countAry[$id]++;
             }
         }
         !empty($countAry) && arsort($countAry);
@@ -187,44 +192,129 @@ class FendArray
      * @param string $type 排序的方式
      * @return array|string
      **/
-    public static function arraySort($array, $keys, $type='asc')
+    public static function arraySort($array, $keys, $type = 'asc')
     {
         if (!isset($array) || !is_array($array) || empty($array)) {
             return '';
         }
-        if (!isset($keys) || trim($keys)=== '') {
+        if (!isset($keys) || trim($keys) === '') {
             return '';
         }
-        if (!isset($type) || $type=='' || !in_array(strtolower($type), array('asc','desc'))) {
+        if (!isset($type) || $type == '' || !in_array(strtolower($type), array('asc', 'desc'))) {
             return '';
         }
-        $keysvalue=array();
-        foreach ($array as $key=>$val) {
+        $keysvalue = array();
+        foreach ($array as $key => $val) {
             if (isset($val[$keys])) {
                 $val[$keys] = str_replace('-', '', $val[$keys]);
                 $val[$keys] = str_replace(' ', '', $val[$keys]);
                 $val[$keys] = str_replace(':', '', $val[$keys]);
-                $keysvalue[] =$val[$keys];
+                $keysvalue[] = $val[$keys];
             } else {
                 return false;
             }
         }
         asort($keysvalue); //key值排序
         reset($keysvalue); //指针重新指向数组第一个
-        foreach ($keysvalue as $key=>$vals) {
+        foreach ($keysvalue as $key => $vals) {
             $keysort[] = $key;
         }
         $keysvalue = array();
-        $count=count($keysort);
+        $count = count($keysort);
         if (strtolower($type) != 'asc') {
-            for ($i=$count-1; $i>=0; $i--) {
+            for ($i = $count - 1; $i >= 0; $i--) {
                 $keysvalue[] = $array[$keysort[$i]];
             }
         } else {
-            for ($i=0; $i<$count; $i++) {
+            for ($i = 0; $i < $count; $i++) {
                 $keysvalue[] = $array[$keysort[$i]];
             }
         }
         return $keysvalue;
+    }
+
+    /**
+     * 获取数组中的值（支持点分）
+     * @param array|null $target 目标数组
+     * @param array | string | null $key 键值，支持点分方式 ep: db.host
+     * @param mixed $default     默认值
+     * @return array|mixed|null
+     */
+    public static function getByKey($target, $key, $default = null)
+    {
+        if (is_null($key)) {
+            return $target;
+        }
+
+        $key = is_array($key) ? $key : explode('.', is_int($key) ? (string)$key : $key);
+        while (!is_null($segment = array_shift($key))) {
+            if (self::isArray($target) && isset($target[$segment])) {
+                $target = $target[$segment];
+            } else {
+                return $default;
+            }
+        }
+        return $target;
+    }
+
+    /**
+     * 设置数组中的值（支持点分）
+     * @param array|null $target 目标数组
+     * @param array | string | null $key 键值，支持点分方式 ep: db.host
+     * @param mixed $value 值
+     * @param bool $overwrite 是否覆盖原有的值
+     * @return array|null
+     */
+    public static function setByKey( &$target, $key, $value, $overwrite = true)
+    {
+        $segments = is_array($key) ? $key : explode('.', $key);
+        $segment = array_shift($segments);
+
+        if (self::isArray($target)) {
+            if ($segments) {
+                if (!isset($target[$segment])) {
+                    $target[$segment] = [];
+                }
+                self::setByKey($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite || !isset($target[$segment])) {
+                $target[$segment] = $value;
+            }
+        } else {
+            $target = [];
+            if ($segments) {
+                self::setByKey($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite) {
+                $target[$segment] = $value;
+            }
+        }
+        return $target;
+    }
+
+    /**
+     * 判断数组中的值是否群战（支持点分）
+     * @param array|null $target 目标数组
+     * @param array | string | null $key 键值，支持点分方式 ep: db.host
+     * @return array|mixed|null
+     */
+    public static function hasByKey($target, $key)
+    {
+        if (is_null($key)) {
+            return false;
+        }
+
+        $key = is_array($key) ? $key : explode('.', is_int($key) ? (string)$key : $key);
+        while (!is_null($segment = array_shift($key))) {
+            if (self::isArray($target) && isset($target[$segment])) {
+                $target = $target[$segment];
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static function isArray($obj)
+    {
+        return is_array($obj) || $obj instanceof \ArrayAccess;
     }
 }

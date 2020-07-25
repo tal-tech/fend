@@ -162,7 +162,7 @@ class FendTimer
      * @param string $date
      * @return int
      */
-    public function getUnixTimeStamp($date = "00-00-00 00:00:00")
+    public static function getUnixTimeStamp($date = "00-00-00 00:00:00")
     {
         if (!$date) {
             return 0;

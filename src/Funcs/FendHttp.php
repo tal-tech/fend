@@ -2,6 +2,7 @@
 
 namespace Fend\Funcs;
 
+use Fend\Core\RequestContext;
 use Fend\Di;
 use Fend\Exception\SystemException;
 use Fend\Log\EagleEye;
@@ -901,7 +902,7 @@ class FendHttp
      */
     public static function doBreak($url = null)
     {
-        $response = \Fend\Di::factory()->get('http_response');
+        $response = RequestContext::get("http_response");
         !$url && $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/';
         if (!empty($response)) {
             $response->header("location", $url);
