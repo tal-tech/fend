@@ -44,7 +44,7 @@ class HttpRequestHandler implements RequestHandler
             $handler = $this->coreHandler;
         } else {
             $handler = $this->middlewares[$this->offset];
-            is_string($handler) && $handler = new $handler();
+            is_string($handler) && $handler = Di::factory()->get($handler);
         }
         if (! method_exists($handler, 'process')) {
             throw new FendException(sprintf('Invalid middleware, it have to provide a process() method.'));

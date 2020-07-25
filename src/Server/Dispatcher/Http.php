@@ -2,11 +2,15 @@
 
 namespace Fend\Server\Dispatcher;
 
+use Fend\Core\Context;
+use Fend\Core\RequestContext;
+use Fend\Coroutine\Coroutine;
 use Fend\Config;
 use Fend\Debug;
 use Fend\Di;
 use Fend\Exception\ExitException;
 use Fend\ExceptionHandle\FendExceptionHandle;
+use Fend\Funcs\FendHttp;
 use Fend\Log\EagleEye;
 
 use Fend\Request;
@@ -44,14 +48,14 @@ class Http extends BaseInterface
         Debug::Init("swoole");
 
         //request
-        Di::factory()->set('http_request', $request);
+        RequestContext::set('http_request', $request);
         $fRequest = new Request("swoole_http");
         Di::factory()->setRequest($fRequest);
 
         //response
-        Di::factory()->set('http_response', $response);
+        RequestContext::set('http_response', $response);
         $fResponse = new Response("swoole_http");
-        Di::factory()->setResponse($fResponse);
+        Di::factory()->setResonse($fResponse);
 
         $_SERVER                    = array_merge($request->server, array_change_key_case($request->server, CASE_UPPER));
         $_SERVER['HTTP_USER_AGENT'] = !empty($request->header['user-agent']) ? $request->header['user-agent'] : '';
@@ -63,8 +67,8 @@ class Http extends BaseInterface
         $_SERVER["HTTP_X_FORWARDED_FOR"] = !empty($request->server["x_forwarded_for"]) ? $request->server["x_forwarded_for"] : '';
 
         //debug info show
-        if ($fRequest->get("wxdebug") == 1) {
-            Debug::enableDebug();
+        if ($fRequest->get("wxdebug") > 0) {
+            Debug::enableDebug($fRequest->get("wxdebug"));
         }
 
         //header
@@ -98,7 +102,7 @@ class Http extends BaseInterface
             $fResponse->header("rpcid", $rpcid);
 
             //record this request
-            EagleEye::setRequestLogInfo("client_ip", \Fend\Funcs\FendHttp::getIp());
+            EagleEye::setRequestLogInfo("client_ip", FendHttp::getIp());
             EagleEye::setRequestLogInfo("action", $domain . $uri);
             EagleEye::setRequestLogInfo("param", json_encode(array(
                 "post" => $fRequest->post(),
@@ -182,6 +186,15 @@ class Http extends BaseInterface
             EagleEye::setRequestLogInfo("response", $result);
             EagleEye::setRequestLogInfo("response_length", strlen($result));
             EagleEye::requestFinished();
+        }
+
+        if (Coroutine::inCoroutine()) {
+            Coroutine::defer(function () {
+                RequestContext::destroy();
+            });
+        } else {
+            RequestContext::destroy();
+            Context::destroy();
         }
 
         //clean up last error before

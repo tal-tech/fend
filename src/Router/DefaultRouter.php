@@ -48,6 +48,12 @@ class DefaultRouter extends Router
             throw new RouterException("Default Router index/index Handle define Class Not Found", 404);
         }
 
+        //filter uri to uppercase first char
+        foreach ($uri as $k => $val)
+        {
+            $uri[$k] = ucfirst($val);
+        }
+
         //尝试uri为class名称
         //查找index执行
         //$className = $className . "\\" . $function;

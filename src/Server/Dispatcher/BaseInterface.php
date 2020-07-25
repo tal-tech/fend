@@ -13,6 +13,9 @@ use Swoole\Timer;
  **/
 abstract class BaseInterface
 {
+    /**
+     * @var \swoole_server|null
+     */
     protected $_currentServer = null;
     protected $_mainObj = null;
 

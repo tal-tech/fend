@@ -74,6 +74,10 @@ class BaseServer
             $this->_config["server"]["socket"]
         );
 
+        if($this->_config['swoole']['enable_coroutine']) {
+            $ret = \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL);
+            echo "start coroutine...". ($ret ? "success" : "failure") . PHP_EOL;
+        }
         //set the swoole config
         $this->_server->set($this->_config["swoole"]);
 
@@ -212,7 +216,7 @@ class BaseServer
                 Di::factory()->setTable($k, $table);
             }
         }
-
+        LogAgent::flushChannel();
         $this->_server->start();
     }
 

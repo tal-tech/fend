@@ -4,7 +4,7 @@ namespace Fend;
 /**
  * swoole task 异步任务投递
  */
-class Task extends Fend
+class Task
 {
     public static function Factory()
     {

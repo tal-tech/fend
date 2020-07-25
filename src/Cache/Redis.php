@@ -3,8 +3,13 @@
 namespace Fend\Cache;
 
 use Fend\Config;
+use Fend\Core\Context;
+use Fend\Coroutine\Coroutine;
+use Fend\Di;
+use Fend\Exception\FendException;
 use Fend\Debug;
 use Fend\Exception\SystemException;
+use Fend\Redis\RedisPool;
 use Fend\Log\EagleEye;
 
 /**
@@ -36,7 +41,7 @@ class Redis
      * @param string $db
      * @param string $hash
      * @return Redis
-     * @throws \Exception
+     * @throws FendException
      */
     public static function Factory($db = 'default', $hash = '')
     {
@@ -45,17 +50,37 @@ class Redis
         if (EagleEye::getGrayStatus() && isset($redisConfig[$db . "-gray"])) {
             $db = $db . "-gray";
         }
-        if (!isset(self::$instance[$db]) || self::$instance[$db] === null) {
-            self::$instance[$db] = new static($db, $hash);
+
+        $key = sprintf('Redis.%s',$db);
+        if (!Context::has($key)) {
+
+            if (Coroutine::inCoroutine()) {
+                /**
+                 * @var $pool RedisPool
+                 */
+                $pool = Di::factory()->get(RedisPool::class, [$db]);
+                $instance = $pool->get();
+
+                Coroutine::defer(function () use ($instance, $pool){
+                    $pool->release($instance);
+                });
+            } else {
+                if(!isset(self::$instance[$key])) {
+                    self::$instance[$key] = new static($db);
+                }
+                $instance = self::$instance[$key];
+            }
+            Context::set($key, $instance);
+
         }
-        return self::$instance[$db];
+        return Context::get($key);
     }
 
     /**
      * Redis constructor.
      * @param string $db
      * @param string $hash
-     * @throws SystemException
+     * @throws FendException
      */
     public function __construct($db = "default", $hash = '')
     {
