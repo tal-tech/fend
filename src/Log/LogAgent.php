@@ -37,6 +37,9 @@ class LogAgent
     //日志前缀
     private static $logPrefix = "";
 
+    //日志过滤
+    private static $filter = null;
+
     /**
      * 日志促使化
      * @param string $logpath
@@ -150,6 +153,22 @@ class LogAgent
     }
 
     /**
+     * 设置日志过滤函数
+     * 用于过滤日志敏感信息
+     * 如果返回为null或""那么日志不会被记录
+     * @param callable $callback 回调函数，函数参数只有一个为单条日志内容数组
+     */
+    public static function setLogFilter($callback)
+    {
+        if (is_callable($callback)) {
+            self::$filter = $callback;
+            return;
+        }
+
+        self::$filter = null;
+    }
+
+    /**
      * 获取日志落地队列状态
      * @return mixed
      */
@@ -194,15 +213,13 @@ class LogAgent
         switch (self::$format) {
             case "json":
                 return json_encode($log);
-                break;
             case "queryString":
                 return http_build_query($log);
-                break;
             case "export":
                 $log["x_timestamp"] = date("Y-m-d H:i:s", $log["x_timestamp"]);
                 return var_export($log, true);
-                break;
         }
+        throw new \RuntimeException('Unknown format type');
     }
 
 
@@ -220,6 +237,16 @@ class LogAgent
     {
         if (empty($log) && $log === "") {
             return;
+        }
+
+        //如果设置了日志过滤函数，那么过滤日志
+        //日志返回null或空字符串那么不会输出日志
+        if (self::$filter != null) {
+            $log = call_user_func(self::$filter, $log);
+
+            if (empty($log)) {
+                return;
+            }
         }
 
         if (self::$dumplogmode == self::LOGAGENT_DUMP_LOG_MODE_DIERECT) {
@@ -262,7 +289,6 @@ class LogAgent
      * */
     public static function flushChannel()
     {
-
         if (self::$dumplogmode == self::LOGAGENT_DUMP_LOG_MODE_CHANNEL) {
             $count = 0;
             $bulkContent = '';
@@ -270,15 +296,14 @@ class LogAgent
                 $bulkContent = $bulkContent . PHP_EOL . self::encodeLog($log);
                 $count++;
                 if ($count > self::MAX_LOG_DUMP_COUNT) {
-                    file_put_contents(self::getFileName(), $bulkContent, FILE_APPEND);
                     $bulkContent = '';
                     $count = 0;
+                    file_put_contents(self::getFileName(), $bulkContent, FILE_APPEND);
                 }
             }
             if (!empty($bulkContent)) {
                 file_put_contents(self::getFileName(), $bulkContent, FILE_APPEND);
             }
-
         }
     }
 }

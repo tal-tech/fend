@@ -1,6 +1,8 @@
 <?php
+
 namespace Fend\Log;
 
+use Fend\Core\RequestContext;
 use Fend\Config;
 use Fend\Di;
 
@@ -10,32 +12,31 @@ use Fend\Di;
  */
 class EagleEye
 {
-
     //set at first
-    public static $_server_ip = "";
-    public static $_version = "fend-1.2";
-    public static $_department = "tal_wx";
+    protected const FIELD_SERVER_IP = "Trace.ServerIP";
+    protected const FIELD_VERSION = "Trace.Version";
+    protected const FIELD_DEPARTMENT = "Trace.Department";
 
     //running parameter
     //must reset every request
-    public static $_start_timestamp = 0;
-    public static $_trace_id = "";
-    public static $_rpc_id = "1";
-    public static $_rpc_id_seq = 1;
-    public static $_pid = "";
+    protected const FIELD_START_TIMESTAMP = "Trace.StartTimestamp";
+    protected const FIELD_TRACE_ID = "Trace.TraceID";
+    public const FIELD_RPC_ID = "Trace.RPC_ID";
+    public const FIELD_RPC_ID_SEQ = "Trace.RPC_ID_SEQ";
+    protected const FIELD_PID = "Trace.Pid";
 
     //depend client var
-    public static $_context = array();
-    public static $_extra_context = array();
+    protected const FIELD_CONTEXT = "Trace.Context";
+    protected const FIELD_EXTRA_CONTEXT = "Trace.ExtraContext";
 
-    //init 标志，如果不是1，所有埋点每次都会产生一个trace_id
-    public static $_init = 0;
+    //init 初始化标志, 0为未初始化 未初始化之前traceid每次都会生成 RPCID会一直持续1.1(解决脚本traceid问题)
+    protected const FIELD_INIT = "Trace.Init";
 
-    //disable 开关
-    public static $_disable = true;
+    //是否禁用trace: true为禁用
+    protected static $_disable = false;
 
     //是否在灰度压测状态
-    public static $_gray = false;
+    protected const FIELD_GRAY = "Trace.Gray";
 
     public static $avalibleKey = array(
         "x_name" => "string",
@@ -78,10 +79,10 @@ class EagleEye
     {
         if (trim($key) != "") {
             if (in_array($key, array("uid", "code", "client_ip", "action", "source", "user_agent", "param", "response",
-                                     "response_length", "msg", "backtrace"), true)) {
-                self::$_context[$key] = $val . "";
+                "response_length", "msg", "backtrace"), true)) {
+                RequestContext::set(self::FIELD_CONTEXT . "." . $key, $val . "");
             } else {
-                self::$_extra_context[$key] = $val;
+                RequestContext::set(self::FIELD_EXTRA_CONTEXT . "." . $key, $val . "");
             }
         }
     }
@@ -101,22 +102,19 @@ class EagleEye
     {
         if (trim($key) != "") {
             if (in_array($key, array("uid", "code", "client_ip", "action", "source", "user_agent", "param", "response",
-                                     "response_length", "msg", "backtrace"), true)) {
-                if (isset(self::$_context[$key])) {
-                    return self::$_context[$key];
-                }
-                return "";
+                "response_length", "msg", "backtrace"), true)) {
+                return RequestContext::get(self::FIELD_CONTEXT . "." . $key, "");
             } else {
-                return self::$_extra_context[$key];
+                return RequestContext::get(self::FIELD_EXTRA_CONTEXT . "." . $key, "");
             }
         }
-        return self::$_extra_context;
+        return RequestContext::get(self::FIELD_EXTRA_CONTEXT, []);
     }
 
     public static function resetRequestLogInfo()
     {
-        self::$_context = array();
-        self::$_extra_context = array();
+        RequestContext::set(self::FIELD_CONTEXT, []);
+        RequestContext::set(self::FIELD_EXTRA_CONTEXT, []);
     }
 
     /**
@@ -145,49 +143,35 @@ class EagleEye
     public static function requestStart($trace_id = "", $rpc_id = "")
     {
         //切换为trace_id模式
-        self::$_init = 1;
+        RequestContext::set(self::FIELD_INIT, 1);
 
         //get local ip
         self::getServerIp();
 
         //get my pid
-        self::$_pid = getmypid();
+        RequestContext::set(self::FIELD_PID, getmypid());
 
         //恢复灰度标志
-        self::$_gray = false;
-
-        //header 如果有灰度压测标志
+        RequestContext::set(self::FIELD_GRAY, false);
+        
         $request = Di::factory()->getRequest();
-        if(strtolower($request->header("Xes_Request_Type")) === "performance-testing"
-         || strtolower($request->header("Xes-Request-Type")) === "performance-testing"
+        if(!empty($request) && ($trace_id !== "" && substr($trace_id,0,4) === "pts_"
+            || strtolower($request->header("Xes_Request_Type")) === "performance-testing"
+                || strtolower($request->header("Xes-Request-Type")) === "performance-testing")
         ) {
-            //开启灰度标志
-            self::$_gray = true;
+            //pts_开头开启灰度标志
+            RequestContext::set(self::FIELD_GRAY, true);
         }
 
         //set trace id by parameter
-        if ($trace_id == "") {
-            //general trace id
-            self::generalTraceId();
-        } else {
-            if(substr($trace_id,0,4) === "pts_") {
-                //pts_开头开启灰度标志
-                self::$_gray = true;
-            }
-            self::$_trace_id = $trace_id;
-        }
+        RequestContext::set(self::FIELD_TRACE_ID, $trace_id == "" ? self::generalTraceId() : $trace_id);
 
         //reset rpc id and seq
-        if ($rpc_id == "") {
-            self::$_rpc_id = "1";
-        } else {
-            self::$_rpc_id = $rpc_id;
-        }
-        self::$_rpc_id_seq = 1;
-
+        RequestContext::set(self::FIELD_RPC_ID, $rpc_id == "" ? "1" : $rpc_id);
+        RequestContext::set(self::FIELD_RPC_ID_SEQ, 1);
 
         //record start timestamp
-        self::$_start_timestamp = microtime(true);
+        RequestContext::set(self::FIELD_START_TIMESTAMP, microtime(true));
 
         self::resetRequestLogInfo();
     }
@@ -202,20 +186,20 @@ class EagleEye
         //set at first
         $log = array(
             "x_name" => "request.info",
-            "x_version" => self::$_version,
-            "x_trace_id" => self::$_trace_id,
-            "x_rpc_id" => self::getReciveRpcId().".1",
-            "x_department" => self::$_department,
+            "x_version" => RequestContext::get(self::FIELD_VERSION, "fend-1.2"),
+            "x_trace_id" => RequestContext::get(self::FIELD_TRACE_ID),
+            "x_rpc_id" => self::getReciveRpcId() . ".1",
+            "x_department" => RequestContext::get(self::FIELD_DEPARTMENT, "tal_wx"),
             "x_server_ip" => self::getServerIp(),
-            "x_timestamp" => (int)self::$_start_timestamp,
-            "x_duration" => round(microtime(true) - self::$_start_timestamp, 4),
-            "x_pid" => self::$_pid . "",
+            "x_timestamp" => (int)RequestContext::get(self::FIELD_START_TIMESTAMP),
+            "x_duration" => round(microtime(true) - RequestContext::get(self::FIELD_START_TIMESTAMP), 4),
+            "x_pid" => RequestContext::get(self::FIELD_PID),
             "x_module" => "php_request_end",
-            "x_extra" => self::$_extra_context
+            "x_extra" => RequestContext::get(self::FIELD_EXTRA_CONTEXT, [])
         );
 
         //option value added
-        foreach (self::$_context as $key => $val) {
+        foreach (RequestContext::get(self::FIELD_CONTEXT, []) as $key => $val) {
             $log["x_" . $key] = $val;
         }
         $log = self::formatLog($log);
@@ -236,14 +220,14 @@ class EagleEye
 
         //set at first
         $log = array(
-            "x_version"     => self::$_version,
-            "x_trace_id"    => self::$_trace_id,
-            "x_department"  => self::$_department,
-            "x_server_ip"   => self::getServerIp(),
-            "x_timestamp"   => time(),
-            "x_pid"         => getmypid(),
-            "x_uid"         => self::getRequestLogInfo("uid"),
-            "x_client_ip"   => self::getRequestLogInfo("client_ip"),
+            "x_version" => RequestContext::get(self::FIELD_VERSION, "fend-1.2"),
+            "x_trace_id" => RequestContext::get(self::FIELD_TRACE_ID),
+            "x_department" => RequestContext::get(self::FIELD_DEPARTMENT, "tal_wx"),
+            "x_server_ip" => self::getServerIp(),
+            "x_timestamp" => time(),
+            "x_pid" => getmypid(),
+            "x_uid" => self::getRequestLogInfo("uid"),
+            "x_client_ip" => self::getRequestLogInfo("client_ip"),
         );
 
         //rpc id value decide
@@ -259,9 +243,8 @@ class EagleEye
         }
 
         //filter the response length
-        if(isset($param["x_response"])) {
-            $traceResponseMaxLen = Config::get("Fend");
-            $traceResponseMaxLen = $traceResponseMaxLen["log"]["traceResponseMaxLen"] ?? -1;
+        if (isset($param["x_response"])) {
+            $traceResponseMaxLen = Config::get("Fend.log.traceResponseMaxLen", -1);
 
             if($traceResponseMaxLen > 0) {
                 //large more cut down
@@ -299,9 +282,9 @@ class EagleEye
             if (isset(self::$avalibleKey[$key])) {
                 //convert the value type
                 if (self::$avalibleKey[$key] === "string") {
-                    if(is_float($val)) {
-                        $val = round($val,4)."";
-                    }else if (is_numeric($val)) {
+                    if (is_float($val)) {
+                        $val = round($val, 4) . "";
+                    } else if (is_numeric($val)) {
                         $val = $val . "";
                     } else if (is_array($val)) {
                         $val = json_encode($val);
@@ -309,7 +292,7 @@ class EagleEye
                 } elseif (self::$avalibleKey[$key] === "int") {
                     $val = intval($val);
                 } elseif (self::$avalibleKey[$key] === "float") {
-                    $val = round(floatval($val), 4)."";
+                    $val = round(floatval($val), 4) . "";
                 }
                 $format_log[$key] = $val;
             } else {
@@ -323,7 +306,7 @@ class EagleEye
             $log["x_extra"]["unknow"] = $unknow_field;
             $format_log["x_extra"] = json_encode($log["x_extra"]);
         } else if (isset($log["x_extra"]) && is_string($log["x_extra"])) {
-            $log["x_extra"] = json_decode($log["x_extra"],true);
+            $log["x_extra"] = json_decode($log["x_extra"], true);
             $log["x_extra"]["unknow"] = $unknow_field;
             $format_log["x_extra"] = json_encode($log["x_extra"]);
         } else {
@@ -336,10 +319,10 @@ class EagleEye
 
     public static function getServerIp()
     {
-        if (self::$_server_ip == "") {
-            self::$_server_ip = gethostname();
+        if (RequestContext::get(self::FIELD_SERVER_IP, "") === "") {
+            RequestContext::set(self::FIELD_SERVER_IP, gethostname());
         }
-        return self::$_server_ip;
+        return RequestContext::get(self::FIELD_SERVER_IP);
     }
 
     /**
@@ -349,10 +332,11 @@ class EagleEye
     public static function getTraceId()
     {
         //如果没有初始化，那么每次请求都会用一个trace_id
-        if (self::$_trace_id == "" || self::$_init == 0) {
+        if (RequestContext::get(self::FIELD_TRACE_ID, "") == ""
+            || RequestContext::get(self::FIELD_INIT) == 0) {
             self::generalTraceId();
         }
-        return self::$_trace_id;
+        return RequestContext::get(self::FIELD_TRACE_ID);
     }
 
     /**
@@ -361,14 +345,7 @@ class EagleEye
      */
     public static function generalTraceId()
     {
-
-        //get local ip
-        if (self::$_server_ip == "") {
-            self::$_server_ip = gethostname();
-        }
-
-        self::$_trace_id = self::$_server_ip . "_" . getmypid() . "_" . (microtime(true) - 1483200000) . "_" . mt_rand(0, 255);
-        return self::$_trace_id;
+        return RequestContext::set(self::FIELD_TRACE_ID, self::getServerIp() . "_" . getmypid() . "_" . (microtime(true) - 1483200000) . "_" . mt_rand(0, 255));
     }
 
     /**
@@ -377,7 +354,7 @@ class EagleEye
      */
     public static function getReciveRpcId()
     {
-        return self::$_rpc_id;
+        return RequestContext::get(self::FIELD_RPC_ID);
     }
 
     /**
@@ -386,7 +363,7 @@ class EagleEye
      */
     public static function getCurrentRpcId()
     {
-        return self::$_rpc_id . "." . self::$_rpc_id_seq;
+        return RequestContext::get(self::FIELD_RPC_ID) . "." . RequestContext::get(self::FIELD_RPC_ID_SEQ);
     }
 
     /**
@@ -395,13 +372,16 @@ class EagleEye
      */
     public static function getNextRpcId()
     {
-        if (self::$_init == 0) {
-            self::$_rpc_id     = 1;
-            self::$_rpc_id_seq = 1;
-            return self::$_rpc_id . "." . self::$_rpc_id_seq;
+        if (RequestContext::get(self::FIELD_INIT) == 0) {
+            RequestContext::set(self::FIELD_RPC_ID, 1);
+            RequestContext::set(self::FIELD_RPC_ID_SEQ, 1);
+            return "1.1";
         }
-        self::$_rpc_id_seq++;
-        return self::$_rpc_id . "." . self::$_rpc_id_seq;
+
+        //incr seq
+        return RequestContext::get(self::FIELD_RPC_ID) . "." . RequestContext::override(self::FIELD_RPC_ID_SEQ, function($value) {
+                return $value ? $value + 1 : 1;
+            });
     }
 
     /**
@@ -410,7 +390,7 @@ class EagleEye
      */
     public static function setVersion($version)
     {
-        self::$_version = $version;
+        RequestContext::set(self::FIELD_VERSION, $version);
     }
 
     /**
@@ -419,7 +399,7 @@ class EagleEye
      */
     public static function getVersion()
     {
-        return self::$_version;
+        return RequestContext::get(self::FIELD_VERSION, "fend-1.2");
     }
 
     /**
@@ -448,7 +428,7 @@ class EagleEye
      */
     public static function getGrayStatus()
     {
-        return self::$_gray;
+        return RequestContext::get(self::FIELD_GRAY, false);
     }
 
     /**
@@ -456,7 +436,7 @@ class EagleEye
      */
     public static function setGrayStatus($enable = true)
     {
-        self::$_gray = $enable;
+        RequestContext::set(self::FIELD_GRAY, $enable);
     }
 
     /**
