@@ -3,7 +3,6 @@
 namespace Fend;
 
 use Fend\Core\RequestContext;
-use Psr\Container\ContainerInterface;
 
 /**
  * 全局变量管理
@@ -11,7 +10,7 @@ use Psr\Container\ContainerInterface;
  * Date: 2017/11/20
  * Time: 下午5:49
  */
-class Di implements ContainerInterface
+class Di
 {
     /**
      * @var Di
