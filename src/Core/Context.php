@@ -11,9 +11,19 @@ class Context
 
     const _GLOBAL = '__GLOBAL';
 
-    protected static $nonCoContext = [];
+    //FPM 下就一个Context
+    protected static $nonCoContext = [
+        "__GLOBAL" => []
+    ];
 
-    public static function setGlobal(string $id, $value)
+    /**
+     * 设置Context Global可继承变量
+     * 通过Fend自带的coroutine创建的协程都会拷贝一份
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    public static function setGlobal(string $key, $value)
     {
         if (Coroutine::inCoroutine()) {
             if (!isset(SwCoroutine::getContext()[self::_GLOBAL])) {
@@ -21,17 +31,20 @@ class Context
             }
 
             $context = SwCoroutine::getContext();
-            FendArray::setByKey($context[self::_GLOBAL], $id, $value);
+            FendArray::setByKey($context[self::_GLOBAL], $key, $value);
         } else {
-            if (!isset(static::$nonCoContext[self::_GLOBAL])) {
-                static::$nonCoContext[self::_GLOBAL] = [];
-            }
-            FendArray::setByKey(static::$nonCoContext[self::_GLOBAL], $id, $value);
+            FendArray::setByKey(static::$nonCoContext[self::_GLOBAL], $key, $value);
         }
         return $value;
     }
 
-    public static function getGlobal(string $id, $default = null)
+    /**
+     * 获取Context Global变量
+     * @param string $key
+     * @param null $default 获取不到返回的默认值
+     * @return array|mixed|null
+     */
+    public static function getGlobal(string $key, $default = null)
     {
         if (Coroutine::inCoroutine()) {
             if (!isset(SwCoroutine::getContext()[self::_GLOBAL])) {
@@ -39,48 +52,64 @@ class Context
             }
 
             $context = SwCoroutine::getContext()[self::_GLOBAL];
-            return FendArray::getByKey($context, $id, $default);
+            return FendArray::getByKey($context, $key, $default);
         } else {
-            if (!isset(static::$nonCoContext[self::_GLOBAL])) {
-                return $default;
-            }
-            return FendArray::getByKey(static::$nonCoContext[self::_GLOBAL], $id, $default);
+            return FendArray::getByKey(static::$nonCoContext[self::_GLOBAL], $key, $default);
         }
     }
 
-    public static function set(string $id, $value)
+    /**
+     * 设置Context kv
+     * @param string $key
+     * @param $value
+     * @return mixed $value
+     */
+    public static function set(string $key, $value)
     {
         if (Coroutine::inCoroutine()) {
             $context = SwCoroutine::getContext();
-            FendArray::setByKey($context, $id, $value);
+            FendArray::setByKey($context, $key, $value);
         } else {
-            FendArray::setByKey(static::$nonCoContext, $id, $value);
+            FendArray::setByKey(static::$nonCoContext, $key, $value);
         }
         return $value;
     }
 
-    public static function get(string $id, $default = null, $coroutineId = null)
+    /**
+     * 获取Context kv
+     * @param string $key
+     * @param mixed $default 如果获取不到返回的默认值
+     * @param mixed $coroutineId 获取指定coroutine id的context
+     * @return array|mixed|null
+     */
+    public static function get(string $key, $default = null, $coroutineId = null)
     {
         if (Coroutine::inCoroutine()) {
             if ($coroutineId !== null) {
-                return FendArray::getByKey(SwCoroutine::getContext($coroutineId), $id, $default);
+                return FendArray::getByKey(SwCoroutine::getContext($coroutineId), $key, $default);
             }
-            return FendArray::getByKey(SwCoroutine::getContext(), $id, $default);
+            return FendArray::getByKey(SwCoroutine::getContext(), $key, $default);
         }
 
-        return FendArray::getByKey(static::$nonCoContext, $id, $default);
+        return FendArray::getByKey(static::$nonCoContext, $key, $default);
     }
 
-    public static function has(string $id, $coroutineId = null)
+    /**
+     * 确认Context key是否存在
+     * @param string $key
+     * @param null $coroutineId
+     * @return array|mixed|null
+     */
+    public static function has(string $key, $coroutineId = null)
     {
         if (Coroutine::inCoroutine()) {
             if ($coroutineId !== null) {
-                return FendArray::hasByKey(SwCoroutine::getContext($coroutineId), $id);
+                return FendArray::hasByKey(SwCoroutine::getContext($coroutineId), $key);
             }
-            return FendArray::hasByKey(SwCoroutine::getContext(), $id);
+            return FendArray::hasByKey(SwCoroutine::getContext(), $key);
         }
 
-        return FendArray::hasByKey(static::$nonCoContext, $id);
+        return FendArray::hasByKey(static::$nonCoContext, $key);
     }
 
     /**
@@ -136,7 +165,7 @@ class Context
      */
     public static function getOrSet(string $id, $value)
     {
-        if (! self::has($id)) {
+        if (!self::has($id)) {
             return self::set($id, $value);
         }
         return self::get($id);
@@ -148,6 +177,6 @@ class Context
             return SwCoroutine::getContext();
         }
 
-        return static::$nonCoContext;
+        return self::$nonCoContext;
     }
 }

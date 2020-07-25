@@ -15,6 +15,10 @@ class Coroutine
 {
     private static $available;
 
+    /**
+     * 当前服务是否有Swoole扩展
+     * @return bool
+     */
     public static function isAvailable(): bool
     {
         return self::$available ?? (self::$available = class_exists(\Swoole\Coroutine::class));
@@ -33,8 +37,8 @@ class Coroutine
     }
 
     /**
-     * 获取指定id协程的父协程id
-     * @param int $cid 可选，要查询的协程id
+     * 获取协程的父协程id
+     * @param int $cid 可选，要查询的协程id 不指定为查找当前协程的
      * @return int|null|false  -1非嵌套协程; false 非协程环境 ; 大于0 为父协程id
      */
     public static function getPcid(int $cid = 0)
@@ -73,10 +77,6 @@ class Coroutine
      */
     public static function inCoroutine(): bool
     {
-        if (!self::isAvailable()) {
-            return false;
-        }
-
         return self::getCid() > 0;
     }
 
@@ -89,6 +89,12 @@ class Coroutine
         }
     }
 
+    /**
+     * 创建协程序，并且继承之前父协程序的context global数据、同时trace的rpcid 计数—+1
+     * @param callable $callable
+     * @param mixed ...$args
+     * @return int
+     */
     public static function create(callable $callable, ...$args): int
     {
         if (self::inCoroutine()) {
@@ -111,6 +117,7 @@ class Coroutine
     }
 
     /**
+     * 批量下发多个协程
      * @param array $tasks
      * @param float $timeout
      * @return array|bool

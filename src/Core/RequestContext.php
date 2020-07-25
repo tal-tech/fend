@@ -1,93 +1,111 @@
 <?php
 declare(strict_types=1);
 
-
 namespace Fend\Core;
-
 
 use Fend\Coroutine\Coroutine;
 use Fend\Funcs\FendArray;
 
 class RequestContext
 {
+    // 所有请求级别context 存储
     protected static $Context = [
         -1 => [],
     ];
 
-    public static function set(string $id, $value)
+    protected static $rootId = [];
+
+    public static function set(string $key, $value)
     {
         if (Coroutine::inCoroutine()) {
-            $cid = Coroutine::getRootId(Coroutine::getCid());
-            if(!isset(self::$Context[$cid])) {
+            $cid = self::getRootId(Coroutine::getCid());
+            if (!isset(self::$Context[$cid])) {
                 self::$Context[$cid] = [];
             }
-            FendArray::setByKey(self::$Context[$cid], $id, $value);
+            FendArray::setByKey(self::$Context[$cid], $key, $value);
         } else {
-            FendArray::setByKey(self::$Context[-1], $id, $value);
+            FendArray::setByKey(self::$Context[-1], $key, $value);
         }
         return $value;
     }
 
-    public static function get(string $id, $default = null)
+    public static function get(string $key, $default = null)
     {
         if (Coroutine::inCoroutine()) {
-            $cid = Coroutine::getRootId(Coroutine::getCid());
-            if(!isset(static::$Context[$cid])) {
+            $cid = self::getRootId(Coroutine::getCid());
+            if (!isset(static::$Context[$cid])) {
                 static::$Context[$cid] = [];
             }
-            return FendArray::getByKey(static::$Context[$cid], $id, $default);
+            return FendArray::getByKey(static::$Context[$cid], $key, $default);
         }
 
-        return FendArray::getByKey(static::$Context[-1], $id, $default);
+        return FendArray::getByKey(static::$Context[-1], $key, $default);
     }
 
-    public static function has(string $id)
+    public static function has(string $key)
     {
         if (Coroutine::inCoroutine()) {
-            $cid = Coroutine::getRootId(Coroutine::getCid());
-            if(!isset(static::$Context[$cid])) {
+            $cid = self::getRootId(Coroutine::getCid());
+            if (!isset(static::$Context[$cid])) {
                 return false;
             }
-            return FendArray::hasByKey(static::$Context[$cid], $id);
+            return FendArray::hasByKey(static::$Context[$cid], $key);
         }
 
-        return FendArray::hasByKey(static::$Context[-1], $id);
+        return FendArray::hasByKey(static::$Context[-1], $key);
     }
 
     /**
      * Retrieve the value and override it by closure.
-     * @param string $id
+     * @param string $key
      * @param \Closure $closure
      * @return mixed|null
      */
-    public static function override(string $id, \Closure $closure)
+    public static function override(string $key, \Closure $closure)
     {
         $value = null;
-        if (self::has($id)) {
-            $value = self::get($id);
+        if (self::has($key)) {
+            $value = self::get($key);
         }
         $value = $closure($value);
-        self::set($id, $value);
+        self::set($key, $value);
         return $value;
     }
 
     /**
-     * @param string $id
+     * 获取指定Cid对应的根Root Context
+     * @param int $id 协程id
+     * @return int
      */
-    public static function destroy(?string $id = null)
+    public static function getRootId(int $id)
+    {
+        if (isset(self::$rootId[$id])) {
+            return self::$rootId[$id];
+        }
+
+        self::$rootId[$id] = Coroutine::getRootId($id);
+        return self::$rootId[$id];
+    }
+
+    /**
+     * 销毁当前RequestContext
+     * @param string $key 如果指定key只是requestContext删除指定key
+     */
+    public static function destroy(?string $key = null)
     {
         if (Coroutine::inCoroutine()) {
-            $cid = Coroutine::getRootId(Coroutine::getCid());
+            $cid = self::getRootId(Coroutine::getCid());
 
-            if (!empty($id)) {
-                unset(static::$Context[$cid][$id]);
+            if (!empty($key)) {
+                unset(static::$Context[$cid][$key]);
             } else {
                 unset(static::$Context[$cid]);
+                unset(self::$rootId[$cid]);
             }
             return;
         }
-        if (!empty($id)) {
-            unset(static::$Context[-1][$id]);
+        if (!empty($key)) {
+            unset(static::$Context[-1][$key]);
         } else {
             static::$Context[-1] = [];
         }
