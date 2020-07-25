@@ -14,15 +14,18 @@ class RequestContext
     ];
 
     protected static $rootId = [];
+    protected static $rootIdMap = [];
 
     public static function set(string $key, $value)
     {
-        if (Coroutine::inCoroutine()) {
-            $cid = self::getRootId(Coroutine::getCid());
-            if (!isset(self::$Context[$cid])) {
-                self::$Context[$cid] = [];
+        $cid = Coroutine::getCid();
+
+        if ($cid !== -1) {
+            $rootId = self::getRootId($cid);
+            if (!isset(self::$Context[$rootId])) {
+                self::$Context[$rootId] = [];
             }
-            FendArray::setByKey(self::$Context[$cid], $key, $value);
+            FendArray::setByKey(self::$Context[$rootId], $key, $value);
         } else {
             FendArray::setByKey(self::$Context[-1], $key, $value);
         }
@@ -31,12 +34,14 @@ class RequestContext
 
     public static function get(string $key, $default = null)
     {
-        if (Coroutine::inCoroutine()) {
-            $cid = self::getRootId(Coroutine::getCid());
-            if (!isset(static::$Context[$cid])) {
-                static::$Context[$cid] = [];
+        $cid = Coroutine::getCid();
+
+        if ($cid !== -1) {
+            $rootId = self::getRootId($cid);
+            if (!isset(static::$Context[$rootId])) {
+                static::$Context[$rootId] = [];
             }
-            return FendArray::getByKey(static::$Context[$cid], $key, $default);
+            return FendArray::getByKey(static::$Context[$rootId], $key, $default);
         }
 
         return FendArray::getByKey(static::$Context[-1], $key, $default);
@@ -44,12 +49,14 @@ class RequestContext
 
     public static function has(string $key)
     {
-        if (Coroutine::inCoroutine()) {
-            $cid = self::getRootId(Coroutine::getCid());
-            if (!isset(static::$Context[$cid])) {
+        $cid = Coroutine::getCid();
+
+        if ($cid !== -1) {
+            $rootId = self::getRootId($cid);
+            if (!isset(static::$Context[$rootId])) {
                 return false;
             }
-            return FendArray::hasByKey(static::$Context[$cid], $key);
+            return FendArray::hasByKey(static::$Context[$rootId], $key);
         }
 
         return FendArray::hasByKey(static::$Context[-1], $key);
@@ -84,6 +91,7 @@ class RequestContext
         }
 
         self::$rootId[$cid] = Coroutine::getRootId($cid);
+        self::$rootIdMap[self::$rootId[$cid]][$cid] = 1;
         return self::$rootId[$cid];
     }
 
@@ -94,13 +102,18 @@ class RequestContext
     public static function destroy(?string $key = null)
     {
         if (Coroutine::inCoroutine()) {
-            $cid = self::getRootId(Coroutine::getCid());
+            $rootId = self::getRootId(Coroutine::getCid());
 
             if (!empty($key)) {
-                unset(static::$Context[$cid][$key]);
+                unset(static::$Context[$rootId][$key]);
             } else {
-                unset(static::$Context[$cid]);
-                unset(self::$rootId[$cid]);
+                unset(static::$Context[$rootId]);
+                if (isset(self::$rootIdMap[$rootId]) && is_array(self::$rootIdMap[$rootId])) {
+                    foreach (self::$rootIdMap[$rootId] as $cidKey => $v) {
+                        unset(self::$rootId[$cidKey]);
+                    }
+                    unset(self::$rootIdMap[$rootId]);
+                }
             }
             return;
         }
