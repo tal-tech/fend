@@ -2,9 +2,13 @@
 
 namespace Fend;
 
+use Fend\Exception\FendException;
+
 class Config
 {
     const LOCALE_PROVIDER = 'localeProvider';
+
+    const CLOUD_PROVIDER = 'cloudProvider';
 
     private static $configPath = SYS_ROOTDIR . "/App/Config/";
 
@@ -20,13 +24,13 @@ class Config
 
     /**
      * @param $path
-     * @throws \Exception
+     * @throws FendException
      */
     public static function setConfigPath($path)
     {
         //not found path
         if (!is_dir($path)) {
-            throw new \Exception("Config Path not exists :" . $path, 4757);
+            throw new FendException("Config Path not exists :" . $path, 4757);
         }
 
         self::$configPath = $path;
@@ -41,7 +45,6 @@ class Config
      * @param string $key 配置文件名前缀（不含扩展名.php）
      * @param string $default 默认返回值，非null 配置项或文件不存在不会抛异常而是返回默认值
      * @return mixed 配置内容
-     * @throws \Exception
      */
     public static function get($key, $default = null)
     {
@@ -60,7 +63,7 @@ class Config
      * @param string $path 配置所在绝对路径
      * @param bool $force 是否每次强制刷新配置内容、不推荐频繁使用 true每次都刷新
      * @return array
-     * @throws \Exception 配置文件不存在
+     * @throws FendException 配置文件不存在
      */
     public static function loadConfig($name, $path, $force = false)
     {
@@ -74,7 +77,7 @@ class Config
 
         //file not exists
         if (!file_exists($path)) {
-            throw new \Exception("Config File not found :" . $path, 4758);
+            throw new FendException("Config File not found :" . $path, 4758);
         }
         self::$config[$name] = include($path);
 
@@ -104,6 +107,7 @@ class Config
         //return loaded config
         if (!isset(self::$config[$configName]) || $forceUpdate) {
             //file not exists
+
             if (!file_exists(self::$configPath . "/" . $configName . ".php")) {
                 if ($default !== null) {
                     return $default;
@@ -117,6 +121,7 @@ class Config
         $index = 1;
         $config = self::$config[$configName];
         while ($index < $len) {
+
             if (!isset($config[$xpath[$index]])) {
                 if ($default !== null) {
                     return $default;
@@ -130,4 +135,10 @@ class Config
         return $config;
     }
 
+//    protected static function cloudProvider(string $key, string $name, array $names, bool $forceUpdate = false)
+//    {
+//        if (!isset(self::$config[$name]) || $forceUpdate) {
+//
+//        }
+//    }
 }

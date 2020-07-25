@@ -2,6 +2,7 @@
 
 namespace Fend;
 
+use Fend\Core\RequestContext;
 use Fend\Exception\FendException;
 
 /**
@@ -67,7 +68,7 @@ class Request
             /**
              * @var \Swoole\Http\Request $request
              */
-            $request = Di::factory()->get("http_request");
+            $request = RequestContext::get("http_request");
 
             if (!$request) {
                 throw new \Exception("swoole request 获取失败", 11);
@@ -347,9 +348,9 @@ class Request
 
         } elseif ($this->_type === "swoole_http") {
             /**
-             * @var \Swoole\Http\Request
+             * @var \Swoole\Http\Request $request
              */
-            $request = Di::factory()->get("http_request");
+            $request = RequestContext::get("http_request");
             if (!$request) {
                 throw new \Exception("swoole request 获取失败", 11);
             }
@@ -392,8 +393,8 @@ class Request
         if (!class_exists($controllerName) || !method_exists($controllerName, $action)) {
             throw new FendException("controller set class $controllerName::$action not exist", -7001);
         }
-        $this->_controller_name = $controllerName;
-        $this->_controller_action = $action;
+        RequestContext::set("router_controller", $controllerName);
+        RequestContext::set("router_action", $action);
     }
 
     /**
@@ -403,8 +404,8 @@ class Request
     public function getController()
     {
         return [
-            "controller" => $this->_controller_name,
-            "action" => $this->_controller_action,
+            "controller" => RequestContext::get("router_controller"),
+            "action" => RequestContext::get("router_action"),
         ];
     }
 

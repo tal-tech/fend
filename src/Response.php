@@ -2,6 +2,7 @@
 
 namespace Fend;
 
+use Fend\Core\RequestContext;
 use Fend\Exception\ExitException;
 use Fend\Log\EagleEye;
 
@@ -30,9 +31,9 @@ class Response
     {
         if ($this->_type === "fpm") {
             header($key . ": " . $value);
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
 
-            $response = Di::factory()->get("http_response");
+            $response = RequestContext::get("http_response");
 
             if (!$response) {
                 throw new \Exception("swoole request 获取失败", 11);
@@ -61,9 +62,9 @@ class Response
     {
         if ($this->_type === "fpm") {
             return setcookie($key, $value, $expire, $path, $domain, $secure, $httponly);
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
 
-            $response = Di::factory()->get("http_response");
+            $response = RequestContext::get("http_response");
 
             if (!$response) {
                 throw new \Exception("swoole request 获取失败", 11);
@@ -87,9 +88,10 @@ class Response
         if ($this->_type === "fpm") {
             EagleEye::setRequestLogInfo("code", $httpCode);
             return http_response_code($httpCode);
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
+
+            $response = RequestContext::get("http_response");
             EagleEye::setRequestLogInfo("code", $httpCode);
-            $response = Di::factory()->get("http_response");
 
             if (!$response) {
                 throw new \Exception("swoole request 获取失败", 11);
@@ -124,9 +126,9 @@ class Response
                     throw new \Exception("未知redirect code类型", 23);
             }
 
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
 
-            $response = Di::factory()->get("http_response");
+            $response = RequestContext::get("http_response");
 
             if (!$response) {
                 throw new \Exception("swoole request 获取失败", 11);
@@ -204,7 +206,7 @@ class Response
             fclose($fp);
             ob_start();
 
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
             $response = Di::factory()->get("http_response");
             $response->write($this->csvFilterLineArray($head) . "\n");
         } else {
@@ -238,7 +240,7 @@ class Response
             fclose($fp);
             ob_start();
 
-        } elseif ($this->_type == "swoole_http") {
+        } elseif ($this->_type === "swoole_http") {
             $response = Di::factory()->get("http_response");
             foreach ($data as $line) {
                 $response->write($this->csvFilterLineArray($line) . "\n");

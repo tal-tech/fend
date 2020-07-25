@@ -27,6 +27,7 @@ class CliFunc
      * 建议使用root权限服务使用
      * @param string $localIP
      * @return string
+     * @throws \RuntimeException
      */
     public static function getLocalIp($localIP = "0.0.0.0")
     {
@@ -50,6 +51,7 @@ class CliFunc
             //can't found ok use first
             return $localIP;
         }
+        throw new \RuntimeException('Unsupported');
     }
 
 }
