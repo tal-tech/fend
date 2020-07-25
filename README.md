@@ -5,10 +5,17 @@
  </a> 
 </p>
 
- * tiny and easy customize
- * FPM/Swoole Smooth switching
- * Debug Mode when request querysting set wxdebug=1|2|3
- * Good ELK Trace Log standard within
+PHP是一款简单方便的语言，而行业开源框架为了`后续灵活` 而变得过于繁重
+
+Fend框架是一款很有历史的框架、初代发布后一直在好未来坊间传播使用、衍生出大量分支版本 
+
+这是一款很有意思的框架、普通的框架内隐藏着大型互联网经验的精华、也同时存在大量历史痕迹
+
+2019年7月 我们对Fend进行整理、封装、推广、目前在好未来内部有大量的用户在使用、维护 
+
+2020年7月 开源、以此共建交流 
+
+我们崇尚 `脚踏实地、仰望星空` 精神 欢迎小伙伴一起参与开源共建
 
 ### Document    
 [Document](https://tal-tech.github.io/fend-doc/)
@@ -23,7 +30,7 @@
 master is 1.2.x version 
 
 ```bash
-composer create-project fend/fend-skeleton project_name
+composer create-project fend/fend-skeleton:~1.2.0 project_name
 ```
 
 Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser 
@@ -31,8 +38,7 @@ Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser
 #### Swoole Engine Start
 
 ```bash
-git clone https://github.com/tal-tech/fend.git
-composer install --no-dev
+composer create-project fend/fend-skeleton:~1.2.0 project_name
 
 # swoole start ( /bin/fend depend on composer require symfony/console )
 php /bin/fend Swoole -c app/Config/Swoole.php start
@@ -40,6 +46,11 @@ php /bin/start.php -c app/Config/Swoole.php start
 ```
 
 browser http://127.0.0.1:9572/ 
+
+## 1.3.0 version install
+```bash
+composer create-project fend/fend-skeleton:~1.3.0 project_name
+```
 
 ## Contact us
 issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
