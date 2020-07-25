@@ -3,6 +3,10 @@
 namespace Fend\Db;
 
 use Fend\Config;
+use Fend\Core\Context;
+use Fend\Coroutine\Coroutine;
+use Fend\Db\MySQL\MySQLPool;
+use Fend\Di;
 use Fend\Exception\SystemException;
 use Fend\Log\EagleEye;
 
@@ -10,7 +14,7 @@ use Fend\Log\EagleEye;
  * Class Mysql
  * @package Fend\Db
  */
-class Mysql extends \Fend\Fend
+class Mysql
 {
     /**
      * @var \mysqli
@@ -33,7 +37,7 @@ class Mysql extends \Fend\Fend
      * @param string $r r|w 读写标志
      * @param string $db database config name
      * @return mixed
-     * @throws SystemException
+     * @throws \Fend\Exception\FendException
      */
     public static function Factory($r, $db = '')
     {
@@ -42,11 +46,35 @@ class Mysql extends \Fend\Fend
         if (EagleEye::getGrayStatus() && isset($dbList[$db . "-gray"])) {
             $db = $db . "-gray";
         }
-        if (isset(self::$in[$db][$r])) {
-            return self::$in[$db][$r];
+
+        $key = sprintf('Mysql.%s.%s',$db, $r);
+        if (!Context::has($key)) {
+            if (Coroutine::inCoroutine()) {
+                /**
+                 * @var $pool MySQLPool
+                 */
+                $pool = Di::factory()->get(MySQLPool::class, [$r, $db]);
+                $instance = $pool->get();
+
+                Coroutine::defer(function () use ($instance, $pool){
+                    $pool->release($instance);
+                });
+            } else {
+                if (!isset(self::$in[$db][$r])) {
+                    self::$in[$db][$r] = new self($r, $db);
+                }
+                $instance = self::$in[$db][$r];
+            }
+            Context::set($key, $instance);
         }
-        self::$in[$db][$r] = new self($r, $db);
-        return self::$in[$db][$r];
+        /**
+         * @var $instance MySQL
+         */
+        $instance = Context::get($key);
+        if (!$instance->checkConnection()) {
+            $instance->connection();
+        }
+        return $instance;
     }
 
     /**
@@ -238,7 +266,7 @@ class Mysql extends \Fend\Fend
                     //如果开启了事务就不再retry、需要打断重来，防止因为链接中断导致事务执行一半，后续在非事务下继续执行
                     if ($this->_transaction_enabled) {
                         //关闭事务标志
-                        $this->_transaction_enabled = false;
+                        $this->_transaction_enabled = false;    
                         EagleEye::baseLog($eagleeyeParam);
                         throw $e;
 

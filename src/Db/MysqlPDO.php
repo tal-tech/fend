@@ -2,6 +2,11 @@
 
 namespace Fend\Db;
 
+use Fend\Core\Context;
+use Fend\Coroutine\Coroutine;
+use Fend\Db\PDO\PDOPool;
+use Fend\Di;
+use Fend\Exception\FendException;
 use Fend\Config;
 use Fend\Exception\SystemException;
 use Fend\Log\EagleEye;
@@ -49,16 +54,31 @@ class MysqlPDO extends \Fend\Fend
      */
     public static function Factory($r, $db = '')
     {
-        //全链路压测时，自动读写影子库
         $dbList = Config::get('Db');
         if (EagleEye::getGrayStatus() && isset($dbList[$db . "-gray"])) {
             $db = $db . "-gray";
         }
-        if (isset(self::$in[$db][$r])) {
-            return self::$in[$db][$r];
+        $key = sprintf('PDO.%s.%s',$db, $r);
+        if (!Context::has($key)) {
+            if (Coroutine::inCoroutine()) {
+                /**
+                 * @var $pool PDOPool
+                 */
+                $pool = Di::factory()->get(PDOPool::class, [$r, $db]);
+                $instance = $pool->get();
+
+                Coroutine::defer(function () use ($instance, $pool){
+                    $pool->release($instance);
+                });
+            } else {
+                if (!isset(self::$in[$db][$r])) {
+                    self::$in[$db][$r] = new self($r, $db);
+                }
+                $instance = self::$in[$db][$r];
+            }
+            Context::set($key, $instance);
         }
-        self::$in[$db][$r] = new self($r, $db);
-        return self::$in[$db][$r];
+        return Context::get($key);
     }
 
     /**
@@ -66,7 +86,7 @@ class MysqlPDO extends \Fend\Fend
      * \Fend\Db\MysqlPdo constructor.
      * @param $r
      * @param $db
-     * @throws \Exception pdo connect or param wrong exception
+     * @throws FendException pdo connect or param wrong exception
      */
     public function __construct($r, $db)
     {
@@ -103,7 +123,7 @@ class MysqlPDO extends \Fend\Fend
      * 链接数据库,失败重试链接两次
      * 仍旧失败抛异常
      * @return bool
-     * @throws \Exception 链接失败
+     * @throws FendException 链接失败
      */
     public function connect()
     {
@@ -143,7 +163,7 @@ class MysqlPDO extends \Fend\Fend
                 $retry--;
 
                 if (!$retry) {
-                    throw $e;
+                    throw new FendException($e->getMessage(), $e->getCode(), $e);
                 }
                 continue;
             }
@@ -171,7 +191,7 @@ class MysqlPDO extends \Fend\Fend
 
     /**
      * 检查数据库连接,是否有效，无效则重新建立
-     * @throws \Exception 链接异常
+     * @throws FendException 链接异常
      */
     protected function checkConnection()
     {
@@ -203,7 +223,7 @@ class MysqlPDO extends \Fend\Fend
      * @param array $bindparam prepare bind
      * @param int $retryCount 重试次数
      * @return bool|\PDOStatement
-     * @throws \Exception 传输失败|SQL 语法错误
+     * @throws FendException 传输失败|SQL 语法错误
      */
     protected function queryWithRetry($sql, $bindparam = [], $retryCount = 4)
     {
@@ -351,7 +371,7 @@ class MysqlPDO extends \Fend\Fend
      * @param array $bindparam prepare bind parameter
      * @param integer $r 是否合并数组
      * @return string|array
-     * @throws SystemException SQL如果格式错误会抛出
+     * @throws FendException SQL如果格式错误会抛出
      * */
     public function get($sql, $r = null, $bindparam = array())
     {
@@ -374,7 +394,7 @@ class MysqlPDO extends \Fend\Fend
      * @param string $sql 标准SQL语句
      * @param array $bindparam prepare bind parameter
      * @return array
-     * @throws SystemException SQL如果格式错误会抛出
+     * @throws FendException SQL如果格式错误会抛出
      * */
     public function getall($sql, $bindparam = array())
     {
@@ -402,7 +422,7 @@ class MysqlPDO extends \Fend\Fend
      * @param string $sql 标准SQL语句
      * @param array $bindparam prepare parameter
      * @return \PDOStatement | bool
-     * @throws SystemException 链接错误，SQL错误
+     * @throws FendException 链接错误，SQL错误
      */
     public function query($sql, $bindparam = array())
     {
@@ -412,7 +432,7 @@ class MysqlPDO extends \Fend\Fend
 
         //emmm ? why ?
         if (empty($this->_db)) {
-            throw new SystemException("db is not Init", -22231);
+            throw new FendException("db is not Init", -22231);
         }
 
         //temp fixed the exception no sql on debug
@@ -453,7 +473,7 @@ class MysqlPDO extends \Fend\Fend
             //record sql info
             \Fend\Debug::appendSqlInfo($debugInfo);
         }
-
+        
         if($exception != null) {
             throw $exception;
         }
@@ -503,7 +523,7 @@ class MysqlPDO extends \Fend\Fend
      *
      * @param string $db 数据库名,默认为当前数据库
      * @return array
-     * @throws SystemException 链接失败，语法错误
+     * @throws FendException 链接失败，语法错误
      **/
     public function getTableList($db = null)
     {
@@ -521,7 +541,7 @@ class MysqlPDO extends \Fend\Fend
      *
      * @param string $tb 表名
      * @return array
-     * @throws SystemException 链接失败，语法错误
+     * @throws FendException 链接失败，语法错误
      **/
     public function getDbFields($tb)
     {
@@ -538,7 +558,7 @@ class MysqlPDO extends \Fend\Fend
      *
      * @param string $tb 表名
      * @return string
-     * @throws SystemException 链接失败，语法错误
+     * @throws FendException 链接失败，语法错误
      **/
     public function sqlTB($tb)
     {
@@ -553,7 +573,7 @@ class MysqlPDO extends \Fend\Fend
      *
      * Example: setTB('table0','table1','tables2',...)
      * @param string 表名称可以是多个
-     * @throws SystemException 链接失败，语法错误
+     * @throws FendException 链接失败，语法错误
      **/
     public function optimizeTable()
     {
