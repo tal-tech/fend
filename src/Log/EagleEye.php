@@ -227,11 +227,17 @@ class EagleEye
             return;
         }
 
+        $requestInfo = RequestContext::getMulti([
+            self::FIELD_VERSION => ["key" => "x_version", "default" => "fend-1.2"],
+            self::FIELD_TRACE_ID => ["key" => "x_trace_id"],
+            self::FIELD_DEPARTMENT => ["key" => "x_department", "default" => "tal_wx"],
+        ]);
+
         //set at first
         $log = array(
-            "x_version" => RequestContext::get(self::FIELD_VERSION, "fend-1.2"),
-            "x_trace_id" => RequestContext::get(self::FIELD_TRACE_ID),
-            "x_department" => RequestContext::get(self::FIELD_DEPARTMENT, "tal_wx"),
+            "x_version" => $requestInfo["x_version"],
+            "x_trace_id" => $requestInfo["x_trace_id"],
+            "x_department" => $requestInfo["x_department"],
             "x_server_ip" => self::getServerIp(),
             "x_timestamp" => time(),
             "x_pid" => getmypid(),
