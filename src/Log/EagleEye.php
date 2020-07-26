@@ -86,7 +86,7 @@ class EagleEye
             }
         }
     }
-    
+
     /**
      * 批量设置请求变量，功能同上
      * @param $data
@@ -142,37 +142,30 @@ class EagleEye
      */
     public static function requestStart($trace_id = "", $rpc_id = "")
     {
-        //切换为trace_id模式
-        RequestContext::set(self::FIELD_INIT, 1);
 
         //get local ip
         self::getServerIp();
 
-        //get my pid
-        RequestContext::set(self::FIELD_PID, getmypid());
+        $data = [
+            self::FIELD_INIT => 1,
+            self::FIELD_PID => getmypid(),
+            self::FIELD_GRAY => false,
+            self::FIELD_TRACE_ID => $trace_id == "" ? self::generalTraceId() : $trace_id,
+            self::FIELD_RPC_ID => $rpc_id == "" ? "1" : $rpc_id,
+            self::FIELD_RPC_ID_SEQ => 1,
+            self::FIELD_START_TIMESTAMP => microtime(true),
+        ];
 
-        //恢复灰度标志
-        RequestContext::set(self::FIELD_GRAY, false);
-        
         $request = Di::factory()->getRequest();
-        if(!empty($request) && ($trace_id !== "" && substr($trace_id,0,4) === "pts_"
-            || strtolower($request->header("Xes_Request_Type")) === "performance-testing"
+        if (!empty($request) && ($trace_id !== "" && substr($trace_id, 0, 4) === "pts_"
+                || strtolower($request->header("Xes_Request_Type")) === "performance-testing"
                 || strtolower($request->header("Xes-Request-Type")) === "performance-testing")
         ) {
             //pts_开头开启灰度标志
-            RequestContext::set(self::FIELD_GRAY, true);
+            $data[self::FIELD_GRAY] = true;
         }
 
-        //set trace id by parameter
-        RequestContext::set(self::FIELD_TRACE_ID, $trace_id == "" ? self::generalTraceId() : $trace_id);
-
-        //reset rpc id and seq
-        RequestContext::set(self::FIELD_RPC_ID, $rpc_id == "" ? "1" : $rpc_id);
-        RequestContext::set(self::FIELD_RPC_ID_SEQ, 1);
-
-        //record start timestamp
-        RequestContext::set(self::FIELD_START_TIMESTAMP, microtime(true));
-
+        RequestContext::setMulti($data);
         self::resetRequestLogInfo();
     }
 
