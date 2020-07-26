@@ -59,17 +59,18 @@ if(EagleEye::isEnable()){
     }
     EagleEye::requestStart($traceId, $rpcId);
 
-    EagleEye::setRequestLogInfo("client_ip", FendHttp::getIp());
-    EagleEye::setRequestLogInfo("action", $domain . $uri);
-    EagleEye::setRequestLogInfo("param", json_encode([
-        "post" => $request->post(),
-        "get"  => $request->get(),
-        "body" => $request->getRaw(),
-    ]));
-    EagleEye::setRequestLogInfo("source", $request->header("referer"));
-    EagleEye::setRequestLogInfo("user_agent", $request->header("user-agent"));
-    EagleEye::setRequestLogInfo("code", 200);
-
+    EagleEye::setMultiRequestLogInfo([
+        "client_ip"=> FendHttp::getIp(),
+        "action" => $domain . $uri,
+        "param" => json_encode([
+            "post" => $request->post(),
+            "get"  => $request->get(),
+            "body" => $request->getRaw(),
+        ]),
+        "source" => $request->header("referer"),
+        "user_agent" => $request->header("user-agent"),
+        "code" => 200,
+    ]);
 
     //response header
     $response->header("traceid", EagleEye::getTraceId());
@@ -104,15 +105,12 @@ try {
     switch ($e->getCode()) {
         case 404:
             $response->status(404);
-            EagleEye::isEnable() && EagleEye::setRequestLogInfo("code", 404);
             break;
         case 405:
             $response->status(405);
-            EagleEye::isEnable() && EagleEye::setRequestLogInfo("code", 405);
             break;
         default:
             $response->status(500);
-            EagleEye::isEnable() && EagleEye::setRequestLogInfo("code", 500);
             break;
     }
     //record exception log
@@ -143,8 +141,10 @@ try {
 
 if(EagleEye::isEnable())
 {
-    EagleEye::setRequestLogInfo("response", $result);
-    EagleEye::setRequestLogInfo("response_length", strlen($result));
+    EagleEye::setMultiRequestLogInfo([
+        "response" => $result,
+        "response_length" => strlen($result)
+    ]);
     EagleEye::requestFinished();
 }
 

@@ -105,16 +105,19 @@ class Http extends BaseInterface
             $fResponse->header("rpcid", $rpcid);
 
             //record this request
-            EagleEye::setRequestLogInfo("client_ip", FendHttp::getIp());
-            EagleEye::setRequestLogInfo("action", $domain . $uri);
-            EagleEye::setRequestLogInfo("param", json_encode(array(
-                "post" => $fRequest->post(),
-                "get"  => $fRequest->get(),
-                "body" => $fRequest->getRaw(),
-            )));
-            EagleEye::setRequestLogInfo("source", isset($request->header["referer"]) ? $request->header["referer"] : '');
-            EagleEye::setRequestLogInfo("user_agent", isset($request->header["user-agent"]) ? $request->header["user-agent"] : '');
-            EagleEye::setRequestLogInfo("code", 200);
+            EagleEye::setMultiRequestLogInfo([
+                "client_ip" => FendHttp::getIp(),
+                "action" => $domain . $uri,
+                "param" => json_encode([
+                    "post" => $fRequest->post(),
+                    "get"  => $fRequest->get(),
+                    "body" => $fRequest->getRaw(),
+                ]),
+                "source" => $fRequest->header("referer"),
+                "user_agent" => $fRequest->header("user-agent"),
+                "code" => 200,
+            ]);
+
         }
 
         //compress
@@ -186,8 +189,11 @@ class Http extends BaseInterface
         }
 
         if(EagleEye::isEnable()) {
-            EagleEye::setRequestLogInfo("response", $result);
-            EagleEye::setRequestLogInfo("response_length", strlen($result));
+            EagleEye::setMultiRequestLogInfo([
+                "response" => $result,
+                "response_length" => strlen($result)
+            ]);
+
             EagleEye::requestFinished();
         }
 
