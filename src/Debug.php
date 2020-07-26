@@ -38,39 +38,33 @@ class Debug
     public static function Init($mode = "fpm")
     {
 
-        //debug info empty
-        RequestContext::set(self::FIELD_OUTPUT, "");
-
-        //enable reset
-        RequestContext::set(self::FIELD_ENABLE, 0);
-
-        //exception collect
-        RequestContext::set(self::FIELD_EXCEP, []);
-
-        //sql info
-        RequestContext::set(self::FIELD_SQL, []);
-
-        //request start process time
-        RequestContext::set(self::FIELD_START_TIME, microtime(true));
+        $data = [
+            self::FIELD_OUTPUT => "",
+            self::FIELD_ENABLE => 0,
+            self::FIELD_EXCEP => [],
+            self::FIELD_SQL => [],
+            self::FIELD_START_TIME => microtime(true)
+        ];
 
         //different mode
         switch ($mode) {
             case "fpm":
-                RequestContext::set(self::FIELD_MODE, "fpm");
+                $data[self::FIELD_MODE] = "fpm";
                 break;
             case "cli":
-                RequestContext::set(self::FIELD_MODE, "cli");
+                $data[self::FIELD_MODE] = "cli";
                 break;
             case "swoole":
                 if(Coroutine::inCoroutine()) {
-                    RequestContext::set(self::FIELD_MODE, "swoole_v4");
+                    $data[self::FIELD_MODE] = "swoole_v4";
                 } else {
-                    RequestContext::set(self::FIELD_MODE, "swoole_v1");
+                    $data[self::FIELD_MODE] = "swoole_v1";
                 }
                 break;
             default:
                 die("\\Fend\\Debug::Init 传入错误的运行状态");
         }
+        RequestContext::setMulti($data);
 
     }
 
@@ -544,7 +538,7 @@ if (!empty($get)) {
         top: 10px;
         right: 10px;
         display: block;
-        width: 50px;
+        width: 80px;
         background-color: green;
         color: white;
         padding: 4px;

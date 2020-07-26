@@ -32,6 +32,26 @@ class RequestContext
         return $value;
     }
 
+    public static function setMulti($data)
+    {
+        $cid = Coroutine::getCid();
+
+        if ($cid !== -1) {
+            $rootId = self::getRootId($cid);
+            if (!isset(self::$Context[$rootId])) {
+                self::$Context[$rootId] = [];
+            }
+            foreach ($data as $key => $val) {
+                FendArray::setByKey(self::$Context[$rootId], $key, $val);
+            }
+        } else {
+            foreach ($data as $key => $val) {
+                FendArray::setByKey(self::$Context[-1], $key, $val);
+            }
+        }
+        return $data;
+    }
+
     public static function get(string $key, $default = null)
     {
         $cid = Coroutine::getCid();
@@ -45,6 +65,28 @@ class RequestContext
         }
 
         return FendArray::getByKey(static::$Context[-1], $key, $default);
+    }
+
+    public static function getMulti($data)
+    {
+        $result = [];
+        $cid = Coroutine::getCid();
+
+        if ($cid !== -1) {
+            $rootId = self::getRootId($cid);
+            if (!isset(static::$Context[$rootId])) {
+                static::$Context[$rootId] = [];
+            }
+            foreach ($data as $key => $default) {
+                $result[$key] = FendArray::getByKey(static::$Context[$rootId], $key, $default);
+            }
+            return $result;
+        }
+        
+        foreach ($data as $key => $default) {
+            $result[$key] = FendArray::getByKey(static::$Context[-1], $key, $default);
+        }
+        return $result;
     }
 
     public static function has(string $key)
