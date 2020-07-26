@@ -47,13 +47,16 @@ class Http extends BaseInterface
         //debug init
         Debug::Init("swoole");
 
+        RequestContext::setMulti([
+            "http_request" => $request,
+            "http_response" => $response,
+        ]);
+
         //request
-        RequestContext::set('http_request', $request);
         $fRequest = new Request("swoole_http");
         Di::factory()->setRequest($fRequest);
 
         //response
-        RequestContext::set('http_response', $response);
         $fResponse = new Response("swoole_http");
         Di::factory()->setResonse($fResponse);
 

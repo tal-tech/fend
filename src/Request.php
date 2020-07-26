@@ -393,8 +393,10 @@ class Request
         if (!class_exists($controllerName) || !method_exists($controllerName, $action)) {
             throw new FendException("controller set class $controllerName::$action not exist", -7001);
         }
-        RequestContext::set("router_controller", $controllerName);
-        RequestContext::set("router_action", $action);
+        RequestContext::setMulti([
+            "router_controller" => $controllerName,
+            "router_action" => $action,
+        ]);
     }
 
     /**

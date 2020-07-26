@@ -113,8 +113,10 @@ class EagleEye
 
     public static function resetRequestLogInfo()
     {
-        RequestContext::set(self::FIELD_CONTEXT, []);
-        RequestContext::set(self::FIELD_EXTRA_CONTEXT, []);
+        RequestContext::setMulti([
+            self::FIELD_CONTEXT=> [],
+            self::FIELD_EXTRA_CONTEXT => [],
+        ]);
     }
 
     /**
@@ -312,10 +314,11 @@ class EagleEye
 
     public static function getServerIp()
     {
-        if (RequestContext::get(self::FIELD_SERVER_IP, "") === "") {
-            RequestContext::set(self::FIELD_SERVER_IP, gethostname());
+        static $ip;
+        if (!$ip) {
+            $ip = gethostname();
         }
-        return RequestContext::get(self::FIELD_SERVER_IP);
+        return $ip;
     }
 
     /**
@@ -366,8 +369,10 @@ class EagleEye
     public static function getNextRpcId()
     {
         if (RequestContext::get(self::FIELD_INIT) == 0) {
-            RequestContext::set(self::FIELD_RPC_ID, 1);
-            RequestContext::set(self::FIELD_RPC_ID_SEQ, 1);
+            RequestContext::setMulti([
+                self::FIELD_RPC_ID => 1,
+                self::FIELD_RPC_ID_SEQ => 1
+            ]);
             return "1.1";
         }
 
