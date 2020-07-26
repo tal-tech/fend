@@ -192,19 +192,28 @@ class EagleEye
      */
     public static function requestFinished()
     {
+        $requestInfo = RequestContext::getMulti([
+            self::FIELD_VERSION => ["key" => "x_version", "default" => "fend-1.2"],
+            self::FIELD_TRACE_ID => ["key" => "x_trace_id"],
+            self::FIELD_DEPARTMENT => ["key" => "x_department", "default" => "tal_wx"],
+            self::FIELD_START_TIMESTAMP => ["key" => "x_timestamp"],
+            self::FIELD_PID => ["key" => "x_pid"],
+            self::FIELD_EXTRA_CONTEXT => ["key" => "x_extra", "default" => []],
+        ]);
+
         //set at first
         $log = array(
             "x_name" => "request.info",
-            "x_version" => RequestContext::get(self::FIELD_VERSION, "fend-1.2"),
-            "x_trace_id" => RequestContext::get(self::FIELD_TRACE_ID),
+            "x_version" => $requestInfo["x_version"],
+            "x_trace_id" => $requestInfo["x_trace_id"],
             "x_rpc_id" => self::getReciveRpcId() . ".1",
-            "x_department" => RequestContext::get(self::FIELD_DEPARTMENT, "tal_wx"),
+            "x_department" => $requestInfo["x_department"],
             "x_server_ip" => self::getServerIp(),
-            "x_timestamp" => (int)RequestContext::get(self::FIELD_START_TIMESTAMP),
-            "x_duration" => round(microtime(true) - RequestContext::get(self::FIELD_START_TIMESTAMP), 4),
-            "x_pid" => RequestContext::get(self::FIELD_PID),
+            "x_timestamp" => (int)$requestInfo["x_timestamp"],
+            "x_duration" => round(microtime(true) - $requestInfo["x_timestamp"], 4),
+            "x_pid" => $requestInfo["x_pid"],
             "x_module" => "php_request_end",
-            "x_extra" => RequestContext::get(self::FIELD_EXTRA_CONTEXT, [])
+            "x_extra" => $requestInfo["x_extra"]
         );
 
         //option value added
