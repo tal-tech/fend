@@ -93,9 +93,23 @@ class EagleEye
      */
     public static function setMultiRequestLogInfo($data)
     {
-        foreach ($data as $key => $item) {
-            self::setRequestLogInfo($key, $item);
+        $context = [];
+
+        foreach ($data as $key => $val) {
+            if (trim($key) != "") {
+                if (in_array($key, array("uid", "code", "client_ip", "action", "source", "user_agent", "param", "response",
+                    "response_length", "msg", "backtrace"), true)) {
+                    $context[self::FIELD_CONTEXT . "." . $key] = $val . "";
+                } else {
+                    $context[self::FIELD_EXTRA_CONTEXT . "." . $key] = $val . "";
+                }
+            }
         }
+
+        if ($context) {
+            RequestContext::setMulti($context);
+        }
+
     }
 
     public static function getRequestLogInfo($key = "")

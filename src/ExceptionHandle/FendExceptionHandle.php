@@ -28,8 +28,13 @@ class FendExceptionHandle implements ExceptionHandleInterface
             "server_ip" => gethostname(),
         ));
 
-        EagleEye::isEnable() && EagleEye::setRequestLogInfo("code", 500);
-        EagleEye::isEnable() && EagleEye::setRequestLogInfo("backtrace", $e->getMessage() . "\r\n" . $e->getTraceAsString());
+        if (EagleEye::isEnable()) {
+            EagleEye::setMultiRequestLogInfo([
+                "code" => 500,
+                "backtrace" => $e->getMessage() . "\r\n" . $e->getTraceAsString()
+            ]);
+        }
+
         return $result;
     }
 }
