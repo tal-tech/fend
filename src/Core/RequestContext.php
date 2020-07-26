@@ -78,13 +78,13 @@ class RequestContext
                 static::$Context[$rootId] = [];
             }
             foreach ($data as $key => $item) {
-                $result[$item["key"] ?? $key] = FendArray::getByKey(static::$Context[$rootId], $item["default"] ?? null);
+                $result[$item["key"] ?? $key] = FendArray::getByKey(static::$Context[$rootId], $key, $item["default"] ?? null);
             }
             return $result;
         }
 
         foreach ($data as $key => $realKey) {
-            $result[$item["key"] ?? $key] = FendArray::getByKey(static::$Context[-1], $item["default"] ?? null);
+            $result[$item["key"] ?? $key] = FendArray::getByKey(static::$Context[-1], $key, $item["default"] ?? null);
         }
         return $result;
     }
