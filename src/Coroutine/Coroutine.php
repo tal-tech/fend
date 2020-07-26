@@ -31,6 +31,7 @@ class Coroutine
     public static function getCid(): int
     {
         if (self::isAvailable()) {
+            //var_dump(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2)[1]["file"]);
             return \Swoole\Coroutine::getCid();
         }
         return -1;

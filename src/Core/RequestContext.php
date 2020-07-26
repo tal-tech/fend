@@ -83,7 +83,7 @@ class RequestContext
             return $result;
         }
 
-        foreach ($data as $key => $realKey) {
+        foreach ($data as $key => $item) {
             $result[$item["key"] ?? $key] = FendArray::getByKey(static::$Context[-1], $key, $item["default"] ?? null);
         }
         return $result;
