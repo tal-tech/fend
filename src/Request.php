@@ -405,10 +405,10 @@ class Request
      */
     public function getController()
     {
-        return [
-            "controller" => RequestContext::get("router_controller"),
-            "action" => RequestContext::get("router_action"),
-        ];
+        return RequestContext::getMulti([
+            "router_controller" => ["key" => "controller"],
+            "router_action" => ["key" => "action"],
+        ]);
     }
 
     /**
