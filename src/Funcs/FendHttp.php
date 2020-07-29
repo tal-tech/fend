@@ -262,14 +262,17 @@ class FendHttp
                 curl_setopt($ch, CURLOPT_URL, $url);
                 break;
             case 'put':
+                curl_setopt($ch, CURLOPT_URL, $url);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                 break;
             case 'patch':
+                curl_setopt($ch, CURLOPT_URL, $url);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                 break;
             case 'delete':
+                curl_setopt($ch, CURLOPT_URL, $url);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                 break;
