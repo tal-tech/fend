@@ -57,4 +57,4 @@ issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fen
 
 加群请加微信： 
 
-![](./contactus.png) 
+![](https://github.com/tal-tech/fend/blob/master/contactus.png?raw=true) 
