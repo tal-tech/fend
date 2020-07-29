@@ -19,6 +19,7 @@ Fend框架是一款很有历史的框架、初代发布后一直在好未来坊�
 
 ### Document    
 [Document](https://tal-tech.github.io/fend-doc/)
+[国内访问](https://www.yuque.com/thinkpc/fend/readme)
 
 ### Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
