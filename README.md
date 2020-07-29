@@ -1,7 +1,7 @@
 
 <p align="center"> 
  <a href="https://tal-tech.github.io/fend-doc/" target="_blank">
-    <img src="https://github.com/tal-tech/fend/raw/master/fend.png"  alt="Fend Logo" align=center />
+    <img src="https://tal-tech.github.io/fend-doc/assets/fend.png"  alt="Fend Logo" align=center />
  </a> 
 </p>
 
