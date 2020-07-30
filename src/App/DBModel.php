@@ -83,13 +83,9 @@ class DBModel extends \Fend\Fend
      */
     public static function factory()
     {
-        static $obj = null;
+        static $self = null;
 
-        $class = static::class;
-        if (!isset($obj[$class])) {
-            $obj[$class] = new static();
-        }
-        return $obj[$class];
+        return $self = $self ?? new static;
     }
 
     /**
