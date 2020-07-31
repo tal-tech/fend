@@ -478,8 +478,8 @@ class EagleEye
      */
     public static function filterUrl(string $url)
     {
-        if ($url && strlen($url) > 0 && $pos = strpos($url, '?') !== false) {
-            $url = substr($url, $pos, -1);
+        if ($url && strlen($url) > 0 && ($pos = strpos($url, '?')) !== false) {
+            $url = substr($url, 0, $pos);
         }
         return $url;
     }
