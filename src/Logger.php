@@ -249,7 +249,7 @@ class Logger
         $log = array(
             "x_name" => $logname,
             "x_trace_id" => EagleEye::getTraceId(),
-            "x_rpc_id" => EagleEye::getCurrentRpcId(),
+            "x_rpc_id" => EagleEye::getNextRpcId(),
             "x_version" => EagleEye::getVersion(),
             "x_timestamp" => time(),
             "x_module" => $tag,
