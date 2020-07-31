@@ -201,6 +201,7 @@ class EagleEye
     {
         //set at first
         $log = array(
+            "x_action" => self::filterUrl(self::getRequestLogInfo("action")),
             "x_name" => "request.info",
             "x_version" => self::$_version,
             "x_trace_id" => self::$_trace_id,
@@ -259,9 +260,8 @@ class EagleEye
         }
 
         //filter the response length
-        if(isset($param["x_response"])) {
-            $traceResponseMaxLen = Config::get("Fend");
-            $traceResponseMaxLen = $traceResponseMaxLen["log"]["traceResponseMaxLen"] ?? -1;
+        if (isset($param["x_response"])) {
+            $traceResponseMaxLen = Config::get("Fend.log.traceResponseMaxLen", -1);
 
             if($traceResponseMaxLen > 0) {
                 //large more cut down
@@ -469,5 +469,18 @@ class EagleEye
             return;
         }
         LogAgent::log($log);
+    }
+
+    /**
+     * 用于网址参数过滤
+     * @param $url
+     * @return string
+     */
+    public static function filterUrl(string $url)
+    {
+        if ($url && strlen($url) > 0 && $pos = strpos($url, '?') !== false) {
+            $url = substr($url, $pos, -1);
+        }
+        return $url;
     }
 }
