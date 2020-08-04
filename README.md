@@ -62,4 +62,5 @@ issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fen
 ![](https://github.com/tal-tech/fend/blob/master/contactus.png?raw=true)
 
 -----
-![](http://static0.xesimg.com/tal-tech-pic/68213862.png) 
+
+<img src="http://static0.xesimg.com/tal-tech-pic/68213862.png"   />
