@@ -1,7 +1,7 @@
 
 <p align="center"> 
  <a href="https://tal-tech.github.io/fend-doc/" target="_blank">
-    <img src="https://github.com/tal-tech/fend-skeleton/blob/master/www/img/fend.png?raw=true"  alt="Fend Logo" align=center />
+    <img src="http://static0.xesimg.com/tal-tech-pic/fend/assets/fend.png?raw=true"  alt="Fend Logo" align=center />
  </a> 
 </p>
 
@@ -59,7 +59,4 @@ issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fen
 
 加群请加微信： 
 
-![](https://github.com/tal-tech/fend/blob/master/contactus.png?raw=true)
-
------
-![](http://static0.xesimg.com/tal-tech-pic/68213862.png) 
+![](http://static0.xesimg.com/tal-tech-pic/fend/assets/contactus.png)
