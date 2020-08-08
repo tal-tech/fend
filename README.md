@@ -61,7 +61,7 @@ composer create-project fend/fend-skeleton:~1.3.0 project_name
 ```
  
  
-## 软件作者贡献列表
+## Contributors
 
 |姓名|事业部|部门|
 |:---| :--- |:---|
@@ -73,7 +73,7 @@ composer create-project fend/fend-skeleton:~1.3.0 project_name
 |谢华亮 (@黑夜路人)|开放平台|智慧教育|
 |陈雷 (@godblessmychildren)|网校|互联网研发部|
 
-(其他贡献者不一一列举)
+(其他贡献者、请详见文档鸣谢)
  
  
 ## Contact us
