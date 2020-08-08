@@ -18,7 +18,7 @@ Fend框架是一款很有历史的框架、初代发布后一直在好未来坊�
 我们崇尚 `脚踏实地、仰望星空` 精神 欢迎小伙伴一起参与开源共建
  
  
-### Document    
+## Document    
 [Document](https://tal-tech.github.io/fend-doc/) 
 
 [国内访问](https://www.yuque.com/tal-tech/fend/readme) 
@@ -44,13 +44,12 @@ Fend 框架是一款以企业快速实现业务为主要目标的框架，但与
  * throw new Exception方式处理业务异常、能够快速发现异常
  
  
-### Release Note
+## Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
  * Tag 1.3.x FPM/Swoole 4.5.x support FPM \<-\> Swoole Coroutine 4.5.x
  
  
 ## Install for 1.2.x branch
- 
  
 #### FPM Engine Start
 master is 1.2.x version 
@@ -73,7 +72,6 @@ php /bin/start.php -c app/Config/Swoole.php start
 ```
 
 browser http://127.0.0.1:9572/ 
- 
  
 ## 1.3.0 version install
 ```bash
