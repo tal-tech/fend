@@ -85,11 +85,7 @@ class DBModel extends \Fend\Fend
     {
         static $obj = null;
 
-        $class = static::class;
-        if (!isset($obj[$class])) {
-            $obj[$class] = new static();
-        }
-        return $obj[$class];
+        return $obj = $obj ?? new static;
     }
 
     /**
