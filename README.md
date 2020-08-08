@@ -44,13 +44,13 @@ Fend 框架是一款以企业快速实现业务为主要目标的框架，但与
  * 符合大数据挖掘设计的Trace日志，方便ELK分析、ClickHouse、HBase、实时预警
  * throw new Exception方式处理业务异常、能够快速发现异常
  
- <hr /> 
+<hr /> 
 
 ## Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
  * Tag 1.3.x FPM/Swoole 4.5.x support FPM \<-\> Swoole Coroutine 4.5.x
  
- <hr /> 
+<hr /> 
 
 ## Install for 1.2.x branch
  
@@ -81,7 +81,7 @@ browser http://127.0.0.1:9572/
 composer create-project fend/fend-skeleton:~1.3.0 project_name
 ```
  
- <hr /> 
+<hr /> 
 
 ## Contributors
 
@@ -97,7 +97,8 @@ composer create-project fend/fend-skeleton:~1.3.0 project_name
 
 (其他贡献者、请详见文档鸣谢)
  
- 
+<hr /> 
+
 ## Contact us
 issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
 
