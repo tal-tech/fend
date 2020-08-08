@@ -16,7 +16,8 @@ Fend框架是一款很有历史的框架、初代发布后一直在好未来坊�
 2020年7月 开源、以此共建交流 
 
 我们崇尚 `脚踏实地、仰望星空` 精神 欢迎小伙伴一起参与开源共建
- 
+
+<hr /> 
  
 ## Document    
 [Document](https://tal-tech.github.io/fend-doc/) 
@@ -43,12 +44,14 @@ Fend 框架是一款以企业快速实现业务为主要目标的框架，但与
  * 符合大数据挖掘设计的Trace日志，方便ELK分析、ClickHouse、HBase、实时预警
  * throw new Exception方式处理业务异常、能够快速发现异常
  
- 
+ <hr /> 
+
 ## Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
  * Tag 1.3.x FPM/Swoole 4.5.x support FPM \<-\> Swoole Coroutine 4.5.x
  
- 
+ <hr /> 
+
 ## Install for 1.2.x branch
  
 #### FPM Engine Start
@@ -78,7 +81,8 @@ browser http://127.0.0.1:9572/
 composer create-project fend/fend-skeleton:~1.3.0 project_name
 ```
  
- 
+ <hr /> 
+
 ## Contributors
 
 |姓名|事业部|部门|
