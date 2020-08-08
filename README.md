@@ -16,18 +16,22 @@ Fend框架是一款很有历史的框架、初代发布后一直在好未来坊�
 2020年7月 开源、以此共建交流 
 
 我们崇尚 `脚踏实地、仰望星空` 精神 欢迎小伙伴一起参与开源共建
-
+ 
+ 
 ### Document    
 [Document](https://tal-tech.github.io/fend-doc/) 
 
 [国内访问](https://www.yuque.com/tal-tech/fend/readme) 
-
+ 
+ 
 ### Release Note
  * Tag 1.2.x FPM/Swoole 1.10.x support FPM \<-\> Swoole 1.10.x
  * Tag 1.3.x FPM/Swoole 4.5.x support FPM \<-\> Swoole Coroutine 4.5.x
-
+ 
+ 
 ## Install for 1.2.x branch
-
+ 
+ 
 #### FPM Engine Start
 master is 1.2.x version 
 
@@ -36,7 +40,8 @@ composer create-project fend/fend-skeleton:~1.2.0 project_name
 ```
 
 Ref [nginx.conf](nginx.conf) to configure Nginx and http://127.0.0.1/ on browser 
-
+ 
+ 
 #### Swoole Engine Start
 
 ```bash
@@ -48,12 +53,14 @@ php /bin/start.php -c app/Config/Swoole.php start
 ```
 
 browser http://127.0.0.1:9572/ 
-
+ 
+ 
 ## 1.3.0 version install
 ```bash
 composer create-project fend/fend-skeleton:~1.3.0 project_name
 ```
-
+ 
+ 
 ## 软件作者贡献列表
 
 |姓名|事业部|部门|
@@ -67,7 +74,8 @@ composer create-project fend/fend-skeleton:~1.3.0 project_name
 |陈雷|网校|互联网研发部|
 
 (其他贡献者不一一列举)
-
+ 
+ 
 ## Contact us
 issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
 
