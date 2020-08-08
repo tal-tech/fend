@@ -54,6 +54,20 @@ browser http://127.0.0.1:9572/
 composer create-project fend/fend-skeleton:~1.3.0 project_name
 ```
 
+## 软件作者贡献列表
+
+|姓名|事业部|部门|
+|:---| :--- |:---|
+|刘帅|网校|平台研发部|
+|韩天峰|网校|架构研发部|
+|徐长龙|网校|架构研发部|
+|李丹阳|网校|架构研发部|
+|陈曹奇昊|网校|架构研发部|
+|谢华亮(黑夜路人)|开放平台|智慧教育|
+|陈雷|网校|互联网研发部|
+
+(其他贡献者不一一列举)
+
 ## Contact us
 issue: [https://github.com/tal-tech/fend/issues](https://github.com/tal-tech/fend/issues) 
 
