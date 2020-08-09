@@ -90,7 +90,6 @@ composer create-project fend/fend-skeleton:~1.3.0 project_name
 |刘帅 (@lsfree) |网校|平台研发部|
 |韩天峰 (@matyhtf) |网校|架构研发部|
 |徐长龙 (@蓝天)|网校|架构研发部|
-|李丹阳 (@会敲打码的喵)|网校|架构研发部|
 |陈曹奇昊 (@twose)|网校|架构研发部|
 |谢华亮 (@黑夜路人)|开放平台|智慧教育|
 |陈雷 (@godblessmychildren)|网校|互联网研发部|
