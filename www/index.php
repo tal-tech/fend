@@ -1,5 +1,5 @@
 <?php
-require_once "../init.php";
+require_once dirname(__DIR__).'/init.php';
 
 use Fend\Config;
 use Fend\Debug;
