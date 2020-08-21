@@ -165,6 +165,22 @@ class Request
     }
 
     /**
+     * 批量获取参数，整合raw post get方式，优先级：raw > post > get
+     * raw参数需要是json格式，否则会被抛弃掉
+     * @return array
+     * @throws \Exception
+     */
+    public function getParams()
+    {
+        $strRaw = $this->getRaw();
+        $arrRaw = [];
+        if (!empty($strRaw)) {
+            $arrRaw = (array)@json_decode($strRaw, true);
+        }
+        return $arrRaw + $this->_post + $this->_get;
+    }
+
+    /**
      * 获取请求参数，post优先级大于get
      * @param string $name 如果不传，那么默认获取全集
      * @param mixed $default 默认值
