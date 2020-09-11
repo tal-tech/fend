@@ -38,7 +38,7 @@ class LogAgent
     private static $logPrefix = "";
 
     /**
-     * 日志促使化
+     * 日志文件存储路径初始化
      * @param string $logpath
      * @throws \Exception 启动模式和运行模式不匹配时会抛异常
      */
