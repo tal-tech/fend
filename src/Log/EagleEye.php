@@ -43,7 +43,7 @@ class EagleEye
         "x_rpc_id" => "string",
         "x_department" => "string",
         "x_version" => "string",
-        "x_timestamp" => "int",
+        "x_timestamp" => "string",
         "x_duration" => "float",
         "x_module" => "string",
         "x_source" => "string",
