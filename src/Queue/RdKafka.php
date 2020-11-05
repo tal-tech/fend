@@ -134,6 +134,7 @@ class RdKafka
             $conf = new \RdKafka\Conf();
             $conf->set('api.version.request', 'true');
             $conf->set('message.send.max.retries', 5);
+            $conf->set('bootstrap.servers', $this->config["Broker"]);
             $producer = new \RdKafka\Producer($conf);
 
             //$rk->setLogLevel(LOG_INFO);
@@ -157,6 +158,7 @@ class RdKafka
             $conf = new \RdKafka\Conf();
             $conf->set('api.version.request', 'true');
             $conf->set('group.id', $this->config["Group"]);
+            $conf->set('bootstrap.servers', $this->config["Broker"]);
             $conf->set('metadata.broker.list', $this->config["Broker"]);
             $conf->set('auto.offset.reset', 'smallest');
 
